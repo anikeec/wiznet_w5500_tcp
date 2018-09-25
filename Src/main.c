@@ -177,11 +177,26 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	uint8_t addr[4] = {192,168,0,125};
+	uint16_t port = 5000;
+	uint8_t retValue = 0;			
+		
   while (1)
   {
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
+		while(1) {		
+			
+			retValue = socket(0, Sn_MR_TCP, port, 0);
+			retValue = connect(0, addr, port);
+			if(retValue == SOCK_OK) {
+				send(0,addr,4);
+			}
+			disconnect(0);
+			
+		}
+		
 		/* Loopback Test */
     	// TCP server loopback test
     	if( (ret = loopback_tcps(SOCK_TCPS, gDATABUF, 5000)) < 0) {
