@@ -82,7 +82,7 @@ uint8_t gDATABUF[DATA_BUF_SIZE];
 wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc,0x00, 0xab, 0xcd},
                             .ip = {192, 168, 0, 224},
                             .sn = {255,255,255,0},
-                            .gw = {192, 168, 1, 1},
+                            .gw = {192, 168, 0, 1},
                             .dns = {8,8,8,8},
                             .dhcp = NETINFO_STATIC };
 
