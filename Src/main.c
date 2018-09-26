@@ -26,6 +26,8 @@ GPIO_TypeDef* SPI_INT_PORT = GPIOA;
 uint16_t SPI_INT_PIN = GPIO_PIN_3;
 GPIO_TypeDef* SPI_CS_PORT = GPIOA;
 uint16_t SPI_CS_PIN = GPIO_PIN_4;
+GPIO_TypeDef* SPI_SCK_PORT = GPIOA;
+uint16_t SPI_SCK_PIN = GPIO_PIN_5;
 
 uint8_t gDATABUF[DATA_BUF_SIZE];
 
@@ -58,27 +60,27 @@ int main(void)
   int32_t ret = 0;
   uint8_t memsize[2][8] = {{2,2,2,2,2,2,2,2},{2,2,2,2,2,2,2,2}};	
 		
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+		/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* Configure the system clock */
+		/* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
+		/* USER CODE BEGIN SysInit */
 
-  /* USER CODE END SysInit */
+		/* USER CODE END SysInit */
 
-  /* Initialize all configured peripherals */
+		/* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
 	
 	wizchip_reset();
 	wizchip_unreset();
 	
-	// First of all, Should register SPI callback functions implemented by user for accessing WIZCHIP
-	/* Critical section callback - No use in this example */
-   //reg_wizchip_cris_cbfunc(0, 0);
-   /* Chip selection call back */
+		// First of all, Should register SPI callback functions implemented by user for accessing WIZCHIP
+		/* Critical section callback - No use in this example */
+		//reg_wizchip_cris_cbfunc(0, 0);
+		/* Chip selection call back */
 	#if   _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_
 			reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
 	#elif _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_FDM_
@@ -90,17 +92,17 @@ int main(void)
 				reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
 		 #endif
 	#endif
-	/* SPI Read & Write callback function */
+		/* SPI Read & Write callback function */
   reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
 
-	/* WIZCHIP SOCKET Buffer initialize */
+		/* WIZCHIP SOCKET Buffer initialize */
   if(ctlwizchip(CW_INIT_WIZCHIP,(void*)memsize) == -1)
   {
      //printf("WIZCHIP Initialized fail.\r\n");
      while(1);
   }
 
-  /* PHY link status check */
+		/* PHY link status check */
   do
   {
       if(ctlwizchip(CW_GET_PHYLINK, (void*)&tmp) == -1) {			 
@@ -108,7 +110,7 @@ int main(void)
         //printf("Unknown PHY Link stauts.\r\n");
   }while(tmp == PHY_LINK_OFF);
 
-  /* Network initialization */
+		/* Network initialization */
   network_init();
 	
 	uint8_t addr[4] = {192,168,0,125};
@@ -118,7 +120,7 @@ int main(void)
   while (1)
   {
 		while(1) {		
-			/* TCP Client */
+				/* TCP Client */
 			retValue = socket(0, Sn_MR_TCP, port, 0);
 			retValue = connect(0, addr, port);
 			if(retValue == SOCK_OK) {
@@ -137,8 +139,9 @@ int main(void)
 
 }
 
-/** System Clock Configuration
-*/
+/* Functions -----------------------------------------------------------------*/
+
+	/** System Clock Configuration */
 void SystemClock_Config(void)
 {
 
@@ -171,18 +174,16 @@ void SystemClock_Config(void)
     /**Configure the Systick interrupt time */
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
-    /**Configure the Systick 
-    */
+    /**Configure the Systick */
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
 }
 
-/* SPI1 init function */
+	/* SPI1 init function */
 static void MX_SPI1_Init(void)
 {
-
   /* SPI1 parameter configuration*/
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
@@ -200,7 +201,6 @@ static void MX_SPI1_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
 }
 
 /** Configure pins as 
@@ -212,7 +212,6 @@ static void MX_SPI1_Init(void)
 */
 static void MX_GPIO_Init(void)
 {
-
   GPIO_InitTypeDef GPIO_InitStruct;
 
   /* GPIO Ports Clock Enable */
@@ -220,22 +219,30 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);	
+  HAL_GPIO_WritePin(SPI_RST_PORT, SPI_RST_PIN, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(SPI_CS_PORT, SPI_CS_PIN, GPIO_PIN_RESET);	
+	HAL_GPIO_WritePin(SPI_SCK_PORT, SPI_SCK_PIN, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, LD4_Pin|LD3_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PA2 PA4 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2|GPIO_PIN_4;
+  /*Configure GPIO pins : RST*/
+  GPIO_InitStruct.Pin = SPI_RST_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(SPI_RST_PORT, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA3 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  /*Configure GPIO pin : INT */
+  GPIO_InitStruct.Pin = SPI_INT_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(SPI_INT_PORT, &GPIO_InitStruct);
+	
+	/*Configure GPIO pins : CS */
+  GPIO_InitStruct.Pin = SPI_CS_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(SPI_CS_PORT, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LD4_Pin LD3_Pin */
   GPIO_InitStruct.Pin = LD4_Pin|LD3_Pin;
@@ -243,8 +250,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 	
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_2, GPIO_PIN_SET);
-
+	wizchip_unreset();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -408,8 +414,6 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
    return 1;
 }
 
-
-/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
