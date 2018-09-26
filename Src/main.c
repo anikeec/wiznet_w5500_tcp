@@ -3,68 +3,22 @@
   * File Name          : main.c
   * Description        : Main program body
   ******************************************************************************
-  ** This notice applies to any and all portions of this file
-  * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether 
-  * inserted by the user or by software development tools
-  * are owned by their respective copyright owners.
-  *
-  * COPYRIGHT(c) 2018 STMicroelectronics
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
   */
+/* Definitions ---------------------------------------------------------------*/	
+#define _WIZCHIP_ 5500
+
+#define SOCK_TCPS        0
+#define SOCK_UDPS        1
+
+#define DATA_BUF_SIZE   2048
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f1xx_hal.h"
-#define _WIZCHIP_ 5500
 #include "./../Ethernet/socket.h"	// Just include one header for WIZCHIP
-
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
-
-/* USER CODE BEGIN PV */
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
-void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
-static void MX_SPI1_Init(void);
-
-/* USER CODE BEGIN PFP */
-/* Private function prototypes -----------------------------------------------*/
-void  wizchip_reset(void);
-void  wizchip_unreset(void);
-/* USER CODE END PFP */
-
-/* USER CODE BEGIN 0 */
 
 GPIO_TypeDef* SPI_RST_PORT = GPIOA;
 uint16_t SPI_RST_PIN = GPIO_PIN_2;
@@ -73,10 +27,6 @@ uint16_t SPI_INT_PIN = GPIO_PIN_3;
 GPIO_TypeDef* SPI_CS_PORT = GPIOA;
 uint16_t SPI_CS_PIN = GPIO_PIN_4;
 
-#define SOCK_TCPS        0
-#define SOCK_UDPS        1
-
-#define DATA_BUF_SIZE   2048
 uint8_t gDATABUF[DATA_BUF_SIZE];
 
 wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc,0x00, 0xab, 0xcd},
@@ -86,35 +36,30 @@ wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc,0x00, 0xab, 0xcd},
                             .dns = {8,8,8,8},
                             .dhcp = NETINFO_STATIC };
 
+/* Private function prototypes -----------------------------------------------*/
+void SystemClock_Config(void);
+static void MX_GPIO_Init(void);
+static void MX_SPI1_Init(void);
+
+void  wizchip_reset(void);
+void  wizchip_unreset(void);
 void  wizchip_select(void);
 void  wizchip_deselect(void);
 void  wizchip_write(uint8_t wb);
 uint8_t wizchip_read();
-void network_init(void);								// Initialize Network information and display it
+void network_init(void);															// Initialize Network information and display it
 int32_t loopback_tcps(uint8_t, uint8_t*, uint16_t);		// Loopback TCP server
 int32_t loopback_udps(uint8_t, uint8_t*, uint16_t);		// Loopback UDP server
 
-/* USER CODE END 0 */
-
+/* Main ----------------------------------------------------------------------*/
 int main(void)
-{
-
-  /* USER CODE BEGIN 1 */
-	
+{	
 	uint8_t tmp;
   int32_t ret = 0;
-  uint8_t memsize[2][8] = {{2,2,2,2,2,2,2,2},{2,2,2,2,2,2,2,2}};
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/	
+  uint8_t memsize[2][8] = {{2,2,2,2,2,2,2,2},{2,2,2,2,2,2,2,2}};	
 		
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
@@ -126,8 +71,6 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_SPI1_Init();
-
-  /* USER CODE BEGIN 2 */
 	
 	wizchip_reset();
 	wizchip_unreset();
@@ -150,44 +93,32 @@ int main(void)
 	/* SPI Read & Write callback function */
   reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
 
-
-
 	/* WIZCHIP SOCKET Buffer initialize */
-    if(ctlwizchip(CW_INIT_WIZCHIP,(void*)memsize) == -1)
-    {
-       //printf("WIZCHIP Initialized fail.\r\n");
-       while(1);
-    }
+  if(ctlwizchip(CW_INIT_WIZCHIP,(void*)memsize) == -1)
+  {
+     //printf("WIZCHIP Initialized fail.\r\n");
+     while(1);
+  }
 
-    /* PHY link status check */
-    do
-    {
-       if(ctlwizchip(CW_GET_PHYLINK, (void*)&tmp) == -1) {
-				 
-			 }
-          //printf("Unknown PHY Link stauts.\r\n");
-    }while(tmp == PHY_LINK_OFF);
+  /* PHY link status check */
+  do
+  {
+      if(ctlwizchip(CW_GET_PHYLINK, (void*)&tmp) == -1) {			 
+			}
+        //printf("Unknown PHY Link stauts.\r\n");
+  }while(tmp == PHY_LINK_OFF);
 
-
-    /* Network initialization */
-    network_init();
-
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+  /* Network initialization */
+  network_init();
+	
 	uint8_t addr[4] = {192,168,0,125};
 	uint16_t port = 5000;
 	uint8_t retValue = 0;			
 		
   while (1)
   {
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
 		while(1) {		
-			
+			/* TCP Client */
 			retValue = socket(0, Sn_MR_TCP, port, 0);
 			retValue = connect(0, addr, port);
 			if(retValue == SOCK_OK) {
@@ -202,14 +133,7 @@ int main(void)
     	if( (ret = loopback_tcps(SOCK_TCPS, gDATABUF, 5000)) < 0) {
 			//printf("SOCKET ERROR : %ld\r\n", (long)ret);
 		}
-	/*
-    	// UDP server loopback test
-		if( (ret = loopback_udps(SOCK_UDPS, gDATABUF, 3000)) < 0) {
-			//printf("SOCKET ERROR : %ld\r\n", (long)ret);
-		}
-*/
   }
-  /* USER CODE END 3 */
 
 }
 
@@ -221,8 +145,7 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
 
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
+    /**Initializes the CPU, AHB and APB busses clocks */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = 8;
@@ -232,8 +155,7 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-    /**Initializes the CPU, AHB and APB busses clocks 
-    */
+    /**Initializes the CPU, AHB and APB busses clocks */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
@@ -246,8 +168,7 @@ void SystemClock_Config(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-    /**Configure the Systick interrupt time 
-    */
+    /**Configure the Systick interrupt time */
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
     /**Configure the Systick 
@@ -326,8 +247,6 @@ static void MX_GPIO_Init(void)
 
 }
 
-/* USER CODE BEGIN 4 */
-
 /////////////////////////////////////////////////////////////////
 // SPI Callback function for accessing WIZCHIP                 //
 // WIZCHIP user should implement with your host spi peripheral //
@@ -356,8 +275,6 @@ void  wizchip_write(uint8_t wb)
 {
 	HAL_SPI_Transmit(&hspi1, &wb, 1, 5);
 	while(HAL_SPI_GetState(&hspi1) != HAL_SPI_STATE_READY){};
-	//HAL_SPI_TransmitReceive(&hspi1, &address, &data, sizeof(data), 0x1000);
-   //xSPISingleDataReadWrite(WIZCHIP_SPI_BASE,wb);
 }
 
 uint8_t wizchip_read()
@@ -365,7 +282,6 @@ uint8_t wizchip_read()
 	uint8_t buffer[5];
 	HAL_SPI_Receive(&hspi1, buffer, 1, 5);
 	while(HAL_SPI_GetState(&hspi1) != HAL_SPI_STATE_READY){};
-   //return xSPISingleDataReadWrite(WIZCHIP_SPI_BASE,0xFF);
 	return buffer[0];
 }
 
@@ -529,13 +445,3 @@ void assert_failed(uint8_t* file, uint32_t line)
 }
 
 #endif
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-*/ 
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
