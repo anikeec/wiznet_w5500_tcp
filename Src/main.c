@@ -43,12 +43,12 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 
-void  wizchip_reset(void);
-void  wizchip_unreset(void);
-void  wizchip_select(void);
-void  wizchip_deselect(void);
-void  wizchip_write(uint8_t wb);
-uint8_t wizchip_read();
+void  wizchipReset(void);
+void  wizchipUnreset(void);
+void  wizchipSelect(void);
+void  wizchipDeselect(void);
+void  wizchipWriteByte(uint8_t wb);
+uint8_t wizchipReadByte();
 void network_init(void);															// Initialize Network information and display it
 int32_t loopback_tcps(uint8_t, uint8_t*, uint16_t);		// Loopback TCP server
 int32_t loopback_udps(uint8_t, uint8_t*, uint16_t);		// Loopback UDP server
@@ -74,26 +74,26 @@ int main(void)
   MX_GPIO_Init();
   MX_SPI1_Init();
 	
-	wizchip_reset();
-	wizchip_unreset();
+	wizchipReset();
+	wizchipUnreset();
 	
 		// First of all, Should register SPI callback functions implemented by user for accessing WIZCHIP
 		/* Critical section callback - No use in this example */
 		//reg_wizchip_cris_cbfunc(0, 0);
 		/* Chip selection call back */
 	#if   _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_VDM_
-			reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
+			reg_wizchip_cs_cbfunc(wizchipSelect, wizchipDeselect);
 	#elif _WIZCHIP_IO_MODE_ == _WIZCHIP_IO_MODE_SPI_FDM_
-			reg_wizchip_cs_cbfunc(wizchip_select, wizchip_select);  // CS must be tried with LOW.
+			reg_wizchip_cs_cbfunc(wizchipSelect, wizchipSelect);  // CS must be tried with LOW.
 	#else
 		 #if (_WIZCHIP_IO_MODE_ & _WIZCHIP_IO_MODE_SIP_) != _WIZCHIP_IO_MODE_SIP_
 				#error "Unknown _WIZCHIP_IO_MODE_"
 		 #else
-				reg_wizchip_cs_cbfunc(wizchip_select, wizchip_deselect);
+				reg_wizchip_cs_cbfunc(wizchipSelect, wizchipDeselect);
 		 #endif
 	#endif
 		/* SPI Read & Write callback function */
-  reg_wizchip_spi_cbfunc(wizchip_read, wizchip_write);
+  reg_wizchip_spi_cbfunc(wizchipReadByte, wizchipWriteByte);
 
 		/* WIZCHIP SOCKET Buffer initialize */
   if(ctlwizchip(CW_INIT_WIZCHIP,(void*)memsize) == -1)
@@ -250,40 +250,40 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 	
-	wizchip_unreset();
+	wizchipUnreset();
 }
 
 /////////////////////////////////////////////////////////////////
 // SPI Callback function for accessing WIZCHIP                 //
 // WIZCHIP user should implement with your host spi peripheral //
 /////////////////////////////////////////////////////////////////
-void  wizchip_reset(void)
+void  wizchipReset(void)
 {
    HAL_GPIO_WritePin(SPI_CS_PORT, SPI_RST_PIN, GPIO_PIN_RESET);
 }
 
-void  wizchip_unreset(void)
+void  wizchipUnreset(void)
 {
    HAL_GPIO_WritePin(SPI_CS_PORT, SPI_RST_PIN, GPIO_PIN_SET);
 }
 
-void  wizchip_select(void)
+void  wizchipSelect(void)
 {
    HAL_GPIO_WritePin(SPI_CS_PORT, SPI_CS_PIN, GPIO_PIN_RESET);
 }
 
-void  wizchip_deselect(void)
+void  wizchipDeselect(void)
 {
    HAL_GPIO_WritePin(SPI_CS_PORT, SPI_CS_PIN, GPIO_PIN_SET);
 }
 
-void  wizchip_write(uint8_t wb)
+void  wizchipWriteByte(uint8_t wb)
 {
 	HAL_SPI_Transmit(&hspi1, &wb, 1, 5);
 	while(HAL_SPI_GetState(&hspi1) != HAL_SPI_STATE_READY){};
 }
 
-uint8_t wizchip_read()
+uint8_t wizchipReadByte()
 {
 	uint8_t buffer[5];
 	HAL_SPI_Receive(&hspi1, buffer, 1, 5);
