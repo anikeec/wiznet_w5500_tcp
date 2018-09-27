@@ -6,8 +6,6 @@
 *.lnp
 *.scr
 *.tra
-*.uvopt
-*.uvproj
 *.bak
 *.htm
 *.hex
@@ -19,5 +17,4 @@
 *.apu
 *.iex
 *.__i
-MDK-ARM/
-.mxproject
+MDK-ARM/wiznet_w5500_tcp/
