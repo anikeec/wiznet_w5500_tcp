@@ -153,30 +153,9 @@ void jsonParserTest(void) {
 		//"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
 		//"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
 		"{\"JSON Test Pattern pass3\":{\"The outermost value\":\"must be an object or array.\",\"In this test\":\"It is an object.\"}}";
-	JSON_Value *root_value;
-  JSON_Array *json_array;
-  JSON_Object *json_element;
 	int i;
-	char string[100];
-	const char* string_ptr;
-	
-	/* parsing json and validating output */
-	root_value = json_parse_string(JSON_STRING);
-	if (json_value_get_type(root_value) != JSONArray) {     
-    return;
-  }
-	
-	/* getting array from root value and printing commit info */
-	json_array = json_value_get_array(root_value);
-	for (i = 0; i < json_array_get_count(json_array); i++) {
-    json_element = json_array_get_object(json_array, i);
-		//memcpy(string, &JSON_STRING[token.start], length);
-		string_ptr = json_object_get_string(json_element, "user");
-    //json_object_dotget_string(json_element, "commit.author.date")
-  }
+	char string[100];	
 
-  /* cleanup code */
-  json_value_free(root_value);
 }
 
 	/** System Clock Configuration */
