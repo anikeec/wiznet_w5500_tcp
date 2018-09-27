@@ -19,5 +19,9 @@
 *.apu
 *.iex
 *.__i
-MDK-ARM/
+MDK-ARM/wiznet_w5500_tcp/
 .mxproject
+*.uvopt
+*.uvproj
+*.apu
+*.dep
