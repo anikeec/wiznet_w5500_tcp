@@ -569,24 +569,14 @@
           <GroupName>Json</GroupName>
           <Files>
             <File>
-              <FileName>cJSON.c</FileName>
+              <FileName>parson.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Json\cJSON.c</FilePath>
+              <FilePath>..\Json\parson.c</FilePath>
             </File>
             <File>
-              <FileName>cJSON.h</FileName>
+              <FileName>parson.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Json\cJSON.h</FilePath>
-            </File>
-            <File>
-              <FileName>cJSON_Utils.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Json\cJSON_Utils.c</FilePath>
-            </File>
-            <File>
-              <FileName>cJSON_Utils.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Json\cJSON_Utils.h</FilePath>
+              <FilePath>..\Json\parson.h</FilePath>
             </File>
           </Files>
         </Group>

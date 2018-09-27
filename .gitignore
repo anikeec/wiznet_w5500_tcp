@@ -6,7 +6,8 @@
 *.lnp
 *.scr
 *.tra
-
+*.uvopt
+*.uvproj
 *.bak
 *.htm
 *.hex
