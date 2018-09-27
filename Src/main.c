@@ -16,6 +16,8 @@
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "./../Ethernet/socket.h"	// Just include one header for WIZCHIP
+#include "./../Json/jsmn.h"
+#include <string.h>
 
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
@@ -52,6 +54,7 @@ uint8_t wizchipReadByte();
 void network_init(void);															// Initialize Network information and display it
 int32_t loopback_tcps(uint8_t, uint8_t*, uint16_t);		// Loopback TCP server
 int32_t loopback_udps(uint8_t, uint8_t*, uint16_t);		// Loopback UDP server
+void jsonParserTest(void);
 
 /* Main ----------------------------------------------------------------------*/
 int main(void)
@@ -59,6 +62,10 @@ int main(void)
 	uint8_t tmp;
   int32_t ret = 0;
   uint8_t memsize[2][8] = {{2,2,2,2,2,2,2,2},{2,2,2,2,2,2,2,2}};	
+		
+		while(1) {
+			jsonParserTest();
+		}
 		
 		/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -140,6 +147,36 @@ int main(void)
 }
 
 /* Functions -----------------------------------------------------------------*/
+
+void jsonParserTest(void) {
+	static const char *JSON_STRING =
+	"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
+	"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
+	int i, r, length;	
+	char string[20];
+	jsmntok_t token;
+	jsmn_parser p;
+	jsmntok_t t[128]; /* We expect no more than 128 tokens */
+
+	jsmn_init(&p);
+	r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t)/sizeof(t[0]));
+	if (r < 0) {
+		//printf("Failed to parse JSON: %d\n", r);
+		return;
+	}
+	/* Assume the top-level element is an object */
+	if (r < 1 || t[0].type != JSMN_OBJECT) {
+		//printf("Object expected\n");
+		return;
+	}
+	
+	for(i=1; i<(r-1); i++) {
+		token = t[i];
+		length = token.end - token.start;
+		memcpy(string, &JSON_STRING[token.start], length);
+	}	
+
+}
 
 	/** System Clock Configuration */
 void SystemClock_Config(void)
