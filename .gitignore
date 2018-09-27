@@ -6,8 +6,7 @@
 *.lnp
 *.scr
 *.tra
-*.uvopt
-*.uvproj
+
 *.bak
 *.htm
 *.hex
@@ -21,7 +20,3 @@
 *.__i
 MDK-ARM/wiznet_w5500_tcp/
 .mxproject
-*.uvopt
-*.uvproj
-*.apu
-*.dep
