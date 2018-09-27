@@ -12,11 +12,17 @@
 
 #define DATA_BUF_SIZE   2048
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "./../Ethernet/socket.h"	// Just include one header for WIZCHIP
-#include "./../Json/parson.h"
+#include "./../Json/cJSON.h"
 #include <string.h>
 
 /* Private variables ---------------------------------------------------------*/
@@ -149,13 +155,38 @@ int main(void)
 /* Functions -----------------------------------------------------------------*/
 
 void jsonParserTest(void) {
-	const char *JSON_STRING = 
-		//"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
-		//"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
-		"{\"JSON Test Pattern pass3\":{\"The outermost value\":\"must be an object or array.\",\"In this test\":\"It is an object.\"}}";
+	char *JSON_STRING = 
+		"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
+		"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
+		//"{\"JSON Test Pattern pass3\":{\"The outermost value\":\"must be an object or array.\",\"In this test\":\"It is an object.\"}}";
 	int i;
-	char string[100];	
+	char string[100];
+	char* str;
+	cJSON *user = NULL;		
+	cJSON *groups = NULL;
+	cJSON *group = NULL;
 
+	cJSON *json_result = cJSON_Parse(JSON_STRING);
+	//if(json_result == NULL) {
+	//	return;
+	//}
+	user = cJSON_GetObjectItemCaseSensitive(json_result, "user");
+	if (cJSON_IsString(user) && (user->valuestring != NULL)) {
+		str = user->valuestring;
+    //printf("Checking \"%s\"\n", user->valuestring);
+  }
+	
+	groups = cJSON_GetObjectItemCaseSensitive(json_result, "groups");
+	int size = cJSON_GetArraySize(groups);
+	for(i=0;i<size;i++) {
+		group = cJSON_GetArrayItem(groups, i);
+		if (cJSON_IsString(group) && (group->valuestring != NULL)) {
+			str = group->valuestring;
+		}
+	}
+	
+	cJSON_Delete(json_result);
+	
 }
 
 	/** System Clock Configuration */
