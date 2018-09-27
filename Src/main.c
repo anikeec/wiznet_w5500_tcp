@@ -156,11 +156,10 @@ int main(void)
 
 void jsonParserTest(void) {
 	char *JSON_STRING = 
-		"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
-		"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
+		"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000, \"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
 		//"{\"JSON Test Pattern pass3\":{\"The outermost value\":\"must be an object or array.\",\"In this test\":\"It is an object.\"}}";
 	int i;
-	char string[100];
+	//char string[100];
 	char* str;
 	cJSON *user = NULL;		
 	cJSON *groups = NULL;

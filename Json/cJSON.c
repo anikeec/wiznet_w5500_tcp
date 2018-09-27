@@ -997,7 +997,7 @@ static parse_buffer *skip_utf8_bom(parse_buffer * const buffer)
 }
 
 /* Parse an object - create a new root, and populate. */
-CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts(const char *value, const char **return_parse_end, cJSON_bool require_null_terminated)
+CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts(char *value, char **return_parse_end, cJSON_bool require_null_terminated)
 {
     parse_buffer buffer = { 0, 0, 0, 0, { 0, 0, 0 } };
     cJSON *item = NULL;
@@ -1011,8 +1011,8 @@ CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts(const char *value, const char **return
         goto fail;
     }
 
-    buffer.content = (const unsigned char*)value;
-    buffer.length = strlen((const char*)value) + sizeof("");
+    buffer.content = (unsigned char*)value;
+    buffer.length = strlen((char*)value) + sizeof("");
     buffer.offset = 0;
     buffer.hooks = global_hooks;
 
@@ -1039,7 +1039,7 @@ CJSON_PUBLIC(cJSON *) cJSON_ParseWithOpts(const char *value, const char **return
     }
     if (return_parse_end)
     {
-        *return_parse_end = (const char*)buffer_at_offset(&buffer);
+        *return_parse_end = (char*)buffer_at_offset(&buffer);
     }
 
     return item;
@@ -1067,7 +1067,7 @@ fail:
 
         if (return_parse_end != NULL)
         {
-            *return_parse_end = (const char*)local_error.json + local_error.position;
+            *return_parse_end = (char*)local_error.json + local_error.position;
         }
 
         global_error = local_error;
@@ -1077,7 +1077,7 @@ fail:
 }
 
 /* Default options for cJSON_Parse */
-CJSON_PUBLIC(cJSON *) cJSON_Parse(const char *value)
+CJSON_PUBLIC(cJSON *) cJSON_Parse(char *value)
 {
     return cJSON_ParseWithOpts(value, 0, 0);
 }
@@ -1494,7 +1494,7 @@ static cJSON_bool print_array(const cJSON * const item, printbuffer * const outp
 }
 
 /* Build an object from the text. */
-static cJSON_bool parse_object(cJSON * const item, parse_buffer * const input_buffer)
+static cJSON_bool parse_object(cJSON * item, parse_buffer * input_buffer)
 {
     cJSON *head = NULL; /* linked list head */
     cJSON *current_item = NULL;
