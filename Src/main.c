@@ -12,6 +12,8 @@
 
 #define DATA_BUF_SIZE   2048
 
+#define MESSAGE_MAX_LENGTH	100
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -19,6 +21,7 @@ extern "C"
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
+#include <string.h>
 #include "main.h"
 #include "stm32f1xx_hal.h"
 #include "./../Ethernet/socket.h"	// Just include one header for WIZCHIP
@@ -61,6 +64,13 @@ void network_init(void);															// Initialize Network information and dis
 int32_t loopback_tcps(uint8_t, uint8_t*, uint16_t);		// Loopback TCP server
 int32_t loopback_udps(uint8_t, uint8_t*, uint16_t);		// Loopback UDP server
 void jsonParserTest(void);
+int createAccessMessage(
+													char** result, 
+													int deviceNumber,
+													int packetNumber,
+													char* cardNumber,
+													char* eventType,
+													int eventId);
 
 /* Main ----------------------------------------------------------------------*/
 int main(void)
@@ -69,10 +79,19 @@ int main(void)
   int32_t ret = 0;
   uint8_t memsize[2][8] = {{2,2,2,2,2,2,2,2},{2,2,2,2,2,2,2,2}};	
 		
+	char buffer[MESSAGE_MAX_LENGTH];	
+	char* message;
+	int* messageLength;
+	char* cardNumber = "123456";
+	int length = 0;
+/*		
 		while(1) {
-			jsonParserTest();
+			//jsonParserTest();
+			createAccessMessage(&message,messageLength,1,2,cardNumber,6,7,8);
+			length = strlen(message);
+			length += 1;
 		}
-		
+*/		
 		/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -127,11 +146,26 @@ int main(void)
   network_init();
 	
 	uint8_t addr[4] = {192,168,0,125};
-	uint16_t port = 5000;
+	uint16_t port = 65530;
 	uint8_t retValue = 0;			
 		
   while (1)
   {
+		while(1) {
+			createAccessMessage(&message,1,2,cardNumber,"EXIT_QUERY",8);
+			length = strlen(message);
+			memset(buffer,NULL,MESSAGE_MAX_LENGTH);
+			strlcpy(buffer,message,length+1);
+			buffer[length++] = 0x0D;
+			buffer[length++] = 0x0A;
+			retValue = socket(0, Sn_MR_TCP, port, 0);
+			retValue = connect(0, addr, port);
+			if(retValue == SOCK_OK) {
+				send(0,(uint8_t*)buffer,length);
+			}
+			disconnect(0);
+		}
+		
 		while(1) {		
 				/* TCP Client */
 			retValue = socket(0, Sn_MR_TCP, port, 0);
@@ -154,6 +188,80 @@ int main(void)
 
 /* Functions -----------------------------------------------------------------*/
 
+/*------------------------------------------------------*/
+//createAccessMessage
+/*------------------------------------------------------*/
+int createAccessMessage(
+													char** result, 
+													int deviceNumber,
+													int packetNumber,
+													char* cardNumber,
+													char* eventType,
+													int eventId) {
+	char *string = NULL;
+	cJSON *messageTypeJson = NULL;		
+	cJSON *deviceNumberJson = NULL;													
+	cJSON *packetNumberJson = NULL;	
+	cJSON *cardNumberJson = NULL;
+	cJSON *eventTypeJson = NULL;
+	cJSON *eventIdJson = NULL;
+														
+	cJSON *message = cJSON_CreateObject();													
+	if (message == NULL) {
+		return 0;
+  }		
+	
+	messageTypeJson = cJSON_CreateString("ACCESS");
+	if (messageTypeJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "mt", messageTypeJson);
+	
+	deviceNumberJson = cJSON_CreateNumber(deviceNumber);
+	if (deviceNumberJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "dn", deviceNumberJson);
+	
+	packetNumberJson = cJSON_CreateNumber(packetNumber);
+	if (packetNumberJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "pn", packetNumberJson);
+	
+	cardNumberJson = cJSON_CreateString(cardNumber);
+	if (cardNumberJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "cn", cardNumberJson);
+	
+	eventTypeJson = cJSON_CreateString(eventType);
+	if (eventTypeJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "et", eventTypeJson);
+	
+	eventIdJson = cJSON_CreateNumber(eventId);
+	if (eventIdJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "ei", eventIdJson);
+	
+	string = cJSON_Print(message);
+	if (string == NULL) {
+		return 0;
+  }
+	
+	*result = string;
+	
+	cJSON_Delete(message);
+	
+	return 1;
+}
+
+/*------------------------------------------------------*/
+//jsonParserTest
+/*------------------------------------------------------*/
 void jsonParserTest(void) {
 	char *JSON_STRING = 
 		"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
