@@ -11,6 +11,7 @@
 #define SOCK_UDPS        1
 
 #define DATA_BUF_SIZE   2048
+#define TEMP_BUF_SIZE 	10
 
 #define MESSAGE_MAX_LENGTH	100
 
@@ -41,6 +42,7 @@ GPIO_TypeDef* SPI_SCK_PORT = GPIOA;
 uint16_t SPI_SCK_PIN = GPIO_PIN_5;
 
 uint8_t gDATABUF[DATA_BUF_SIZE];
+uint8_t tempBuffer[TEMP_BUF_SIZE];
 
 wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc,0x00, 0xab, 0xcd},
                             .ip = {192, 168, 0, 224},
@@ -71,7 +73,10 @@ int createAccessMessage(
 													char* cardNumber,
 													char* eventType,
 													int eventId);
-int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t port);
+int16_t receiveServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t bufSize, uint16_t port);
+int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t bufSize, uint16_t port);
+uint8_t getSocketStatus(uint8_t socketNumber);
+int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount);
 
 /* Main ----------------------------------------------------------------------*/
 int main(void)
@@ -149,7 +154,7 @@ int main(void)
 	uint8_t addr[4] = {192,168,0,125};
 	uint16_t port = 65530;
 	uint8_t retValue = 0;
-	int32_t receivedSize = 0;	
+	int8_t receivedResult = 0;	
 		
   while (1)
   {
@@ -165,13 +170,13 @@ int main(void)
 			if(retValue == SOCK_OK) {
 				send(0,(uint8_t*)buffer,length);
 			}
-			receivedSize = 0;
-			while(receivedSize < 10) {
-				receivedSize = waitServerAnswer(SOCK_TCPS, gDATABUF, 2048);
-				if(receivedSize < 0) {
-					
-				}				
-			}
+			
+			memset(gDATABUF, NULL, DATA_BUF_SIZE);
+			receivedResult = receiveServerAnswer(SOCK_TCPS, gDATABUF, DATA_BUF_SIZE, port);
+			if(receivedResult > 0) {
+				//we can parse result in the gDATABUF
+				parseServerAnswer(gDATABUF, receivedResult);
+			}				
 			disconnect(0);
 		}
 		
@@ -267,15 +272,81 @@ int createAccessMessage(
 	
 	return 1;
 }
+		
+/*------------------------------------------------------*/
+//parseServerAnswer
+/*------------------------------------------------------*/
+int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
+	dataAmount++;
+	
+	return 0;
+}
+													
+/*------------------------------------------------------*/
+//getSocketStatus
+/* 
+ * return values:
+ * @par Normal status
+ * - @ref SOCK_CLOSED 		: Closed
+ * - @ref SOCK_INIT   		: Initiate state
+ * - @ref SOCK_LISTEN    	: Listen state
+ * - @ref SOCK_ESTABLISHED 	: Success to connect
+ * - @ref SOCK_CLOSE_WAIT   : Closing state
+ * - @ref SOCK_UDP   		: UDP socket
+ * - @ref SOCK_MACRAW  		: MAC raw mode socket
+ *@par Temporary status during changing the status of Socket n.
+ * - @ref SOCK_SYNSENT   	: This indicates Socket n sent the connect-request packet (SYN packet) to a peer.
+ * - @ref SOCK_SYNRECV    	: It indicates Socket n successfully received the connect-request packet (SYN packet) from a peer.
+ * - @ref SOCK_FIN_WAIT		: Connection state
+ * - @ref SOCK_CLOSING		: Closing state
+ * - @ref SOCK_TIME_WAIT	: Closing state
+ * - @ref SOCK_LAST_ACK 	: Closing state
+*/
+/*------------------------------------------------------*/
+uint8_t getSocketStatus(uint8_t socketNumber) {
+	return getSn_SR(socketNumber);
+}
+
+/*------------------------------------------------------*/
+//receiveServerAnswer
+/*
+ * ret values
+ * -1 - some error
+ * >0 - receive OK and return amount of received bytes
+*/
+/*------------------------------------------------------*/
+int16_t receiveServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t bufSize, uint16_t port) {
+	int32_t receiveSize = 0;
+	uint16_t bufferPosition = 0;
+	uint8_t i = 0, previousSymbol = NULL, currentSymbol = NULL;
+	
+	memset(tempBuffer, NULL, TEMP_BUF_SIZE);
+	while(1) {		
+		receiveSize = waitServerAnswer(socketNumber, tempBuffer, TEMP_BUF_SIZE, port);
+		if(receiveSize > 0) {
+			for(i=0; i<receiveSize; i++) {
+				previousSymbol = currentSymbol;
+				currentSymbol = tempBuffer[i];
+				buf[bufferPosition++] = currentSymbol;
+				if((previousSymbol == 0x0D) && (currentSymbol == 0x0A)) {
+					return bufferPosition;
+				}
+			}
+			memset(tempBuffer, NULL, TEMP_BUF_SIZE);
+		} else if(receiveSize < 0) {
+			return -1;
+		}
+	}
+}
 	
 /*------------------------------------------------------*/
 //waitServerAnswer
 /*------------------------------------------------------*/
-int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t port)
+int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t bufSize, uint16_t port)
 {
    int32_t ret;
    uint16_t size = 0, sentsize=0;
-		uint8_t retValue = getSn_SR(socketNumber);
+	 uint8_t retValue = getSocketStatus(socketNumber);
    switch(retValue)
    {
       case SOCK_ESTABLISHED:
@@ -283,11 +354,13 @@ int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t port)
          {
             //Connected
             setSn_IR(socketNumber,Sn_IR_CON);
+						/* In this case, if the interrupt of Socket n is activated, interrupt occurs. Refer to IR, IMR
+								Sn_IMR and Sn_IR. */
          }
          if((size = getSn_RX_RSR(socketNumber)) > 0)
          {
-            if(size > DATA_BUF_SIZE) { 
-							size = DATA_BUF_SIZE;
+            if(size > bufSize) { 
+							size = bufSize;
 						}
             ret = recv(socketNumber,buf,size);
             if(ret <= 0) 
@@ -305,27 +378,28 @@ int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t port)
                sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
             }
 						*/
+						return ret;
          }
          break;
       case SOCK_CLOSE_WAIT:
          //CloseWait
-         if((ret=disconnect(socketNumber)) != SOCK_OK) return ret;
+         if((ret=disconnect(socketNumber)) != SOCK_OK) return -1;
          //Closed
          break;
       case SOCK_INIT:
     	  //Listen, port, socketNumber, port
-         if( (ret = listen(socketNumber)) != SOCK_OK) return ret;
+         if( (ret = listen(socketNumber)) != SOCK_OK) return -1;
          break;
       case SOCK_CLOSED:
          //LBTStart
          if((ret=socket(socketNumber,Sn_MR_TCP,port,0x00)) != socketNumber)
-            return ret;
+            return -1;
          //Opened
          break;
       default:
          break;
    }
-   return 1;
+   return 0;
 }
 
 /*------------------------------------------------------*/
