@@ -31,7 +31,7 @@ int main(void)
 	int length = 0;
 	
 	uint8_t retValue = 0;
-	int8_t receivedResult = 0;	
+	int16_t receivedResult = 0;	
 	uint8_t addr[4] = {NW_SERVER_ADDR0, NW_SERVER_ADDR1, NW_SERVER_ADDR2, NW_SERVER_ADDR3};
 /*		
 		while(1) {
