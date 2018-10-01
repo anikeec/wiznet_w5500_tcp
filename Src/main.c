@@ -71,6 +71,7 @@ int createAccessMessage(
 													char* cardNumber,
 													char* eventType,
 													int eventId);
+int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t port);
 
 /* Main ----------------------------------------------------------------------*/
 int main(void)
@@ -147,7 +148,8 @@ int main(void)
 	
 	uint8_t addr[4] = {192,168,0,125};
 	uint16_t port = 65530;
-	uint8_t retValue = 0;			
+	uint8_t retValue = 0;
+	int32_t receivedSize = 0;	
 		
   while (1)
   {
@@ -162,6 +164,13 @@ int main(void)
 			retValue = connect(0, addr, port);
 			if(retValue == SOCK_OK) {
 				send(0,(uint8_t*)buffer,length);
+			}
+			receivedSize = 0;
+			while(receivedSize < 10) {
+				receivedSize = waitServerAnswer(SOCK_TCPS, gDATABUF, 2048);
+				if(receivedSize < 0) {
+					
+				}				
 			}
 			disconnect(0);
 		}
@@ -257,6 +266,66 @@ int createAccessMessage(
 	cJSON_Delete(message);
 	
 	return 1;
+}
+	
+/*------------------------------------------------------*/
+//waitServerAnswer
+/*------------------------------------------------------*/
+int32_t waitServerAnswer(uint8_t socketNumber, uint8_t* buf, uint16_t port)
+{
+   int32_t ret;
+   uint16_t size = 0, sentsize=0;
+		uint8_t retValue = getSn_SR(socketNumber);
+   switch(retValue)
+   {
+      case SOCK_ESTABLISHED:
+         if(getSn_IR(socketNumber) & Sn_IR_CON)
+         {
+            //Connected
+            setSn_IR(socketNumber,Sn_IR_CON);
+         }
+         if((size = getSn_RX_RSR(socketNumber)) > 0)
+         {
+            if(size > DATA_BUF_SIZE) { 
+							size = DATA_BUF_SIZE;
+						}
+            ret = recv(socketNumber,buf,size);
+            if(ret <= 0) 
+							return ret;
+						/*
+            sentsize = 0;
+            while(size != sentsize)
+            {
+               ret = send(socketNumber,buf+sentsize,size-sentsize);
+               if(ret < 0)
+               {
+                  close(socketNumber);
+                  return ret;
+               }
+               sentsize += ret; // Don't care SOCKERR_BUSY, because it is zero.
+            }
+						*/
+         }
+         break;
+      case SOCK_CLOSE_WAIT:
+         //CloseWait
+         if((ret=disconnect(socketNumber)) != SOCK_OK) return ret;
+         //Closed
+         break;
+      case SOCK_INIT:
+    	  //Listen, port, socketNumber, port
+         if( (ret = listen(socketNumber)) != SOCK_OK) return ret;
+         break;
+      case SOCK_CLOSED:
+         //LBTStart
+         if((ret=socket(socketNumber,Sn_MR_TCP,port,0x00)) != socketNumber)
+            return ret;
+         //Opened
+         break;
+      default:
+         break;
+   }
+   return 1;
 }
 
 /*------------------------------------------------------*/
