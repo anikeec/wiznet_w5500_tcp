@@ -1,0 +1,133 @@
+
+/* Includes ------------------------------------------------------------------*/
+#include "definitions.h"
+#include "main.h"
+#include "network.h"
+#include "engine.h"
+#include "./../Json/cJSON.h"
+#include <string.h>
+
+/* External variables --------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
+
+
+/* Functions -----------------------------------------------------------------*/
+
+/*------------------------------------------------------*/
+//createAccessMessage
+/*------------------------------------------------------*/
+int createAccessMessage(
+													char** result, 
+													int deviceNumber,
+													int packetNumber,
+													char* cardNumber,
+													char* eventType,
+													int eventId) {
+	char *string = NULL;
+	cJSON *messageTypeJson = NULL;		
+	cJSON *deviceNumberJson = NULL;													
+	cJSON *packetNumberJson = NULL;	
+	cJSON *cardNumberJson = NULL;
+	cJSON *eventTypeJson = NULL;
+	cJSON *eventIdJson = NULL;
+														
+	cJSON *message = cJSON_CreateObject();													
+	if (message == NULL) {
+		return 0;
+  }		
+	
+	messageTypeJson = cJSON_CreateString("ACCESS");
+	if (messageTypeJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "mt", messageTypeJson);
+	
+	deviceNumberJson = cJSON_CreateNumber(deviceNumber);
+	if (deviceNumberJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "dn", deviceNumberJson);
+	
+	packetNumberJson = cJSON_CreateNumber(packetNumber);
+	if (packetNumberJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "pn", packetNumberJson);
+	
+	cardNumberJson = cJSON_CreateString(cardNumber);
+	if (cardNumberJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "cn", cardNumberJson);
+	
+	eventTypeJson = cJSON_CreateString(eventType);
+	if (eventTypeJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "et", eventTypeJson);
+	
+	eventIdJson = cJSON_CreateNumber(eventId);
+	if (eventIdJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "ei", eventIdJson);
+	
+	string = cJSON_Print(message);
+	if (string == NULL) {
+		return 0;
+  }
+	
+	*result = string;
+	
+	cJSON_Delete(message);
+	
+	return 1;
+}
+		
+/*------------------------------------------------------*/
+//parseServerAnswer
+/*------------------------------------------------------*/
+int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
+	dataAmount++;
+	
+	return 0;
+}
+
+/*------------------------------------------------------*/
+//jsonParserTest
+/*------------------------------------------------------*/
+void jsonParserTest(void) {
+	char *JSON_STRING = 
+		"{\"user\": \"johndoe\", \"admin\": false, \"uid\": 1000,\n  "
+		"\"groups\": [\"users\", \"wheel\", \"audio\", \"video\"]}";
+		//"{\"JSON Test Pattern pass3\":{\"The outermost value\":\"must be an object or array.\",\"In this test\":\"It is an object.\"}}";
+	int i;
+	//char string[100];
+	char* str;
+	cJSON *user = NULL;		
+	cJSON *groups = NULL;
+	cJSON *group = NULL;
+
+	cJSON *json_result = cJSON_Parse(JSON_STRING);
+	//if(json_result == NULL) {
+	//	return;
+	//}
+	user = cJSON_GetObjectItemCaseSensitive(json_result, "user");
+	if (cJSON_IsString(user) && (user->valuestring != NULL)) {
+		str = user->valuestring;
+    //printf("Checking \"%s\"\n", user->valuestring);
+  }
+	
+	groups = cJSON_GetObjectItemCaseSensitive(json_result, "groups");
+	int size = cJSON_GetArraySize(groups);
+	for(i=0;i<size;i++) {
+		group = cJSON_GetArrayItem(groups, i);
+		if (cJSON_IsString(group) && (group->valuestring != NULL)) {
+			str = group->valuestring;
+		}
+	}
+	
+	cJSON_Delete(json_result);
+	
+}
