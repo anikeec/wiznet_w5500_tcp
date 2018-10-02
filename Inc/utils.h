@@ -1,6 +1,6 @@
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __HARDWARE_H
-#define __HARDWARE_H
+#ifndef __UTILS_H
+#define __UTILS_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -8,22 +8,33 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
-#include "utils.h"
+	 
+/* Definitions----------------------------------------------------------------*/
+
+	 
 /* Exported types ------------------------------------------------------------*/
+struct DateTimeType {
+	uint8_t		year;
+	uint8_t 	month;
+	uint8_t 	day;
+	uint8_t		hours;
+	uint8_t 	minutes;
+	uint8_t 	seconds;
+};
+
+typedef struct DateTimeType	DateTime;
+	 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void hardwareInit(void);
-void  wizchipReset(void);
-void  wizchipUnreset(void);
-void  wizchipSelect(void);
-void  wizchipDeselect(void);
-void  wizchipWriteByte(uint8_t wb);
-uint8_t wizchipReadByte();
-void rtcGetDateTime(DateTime* dateTime);
+char* dateTimeToJsonDate(DateTime dateTime);
+void uint8ToChars(uint8_t temp_var, uint8_t *temp_chars);
+void uint16ToChars(uint16_t temp_var, uint8_t *temp_chars);
+void uint32ToChars(uint32_t temp_var, uint8_t *temp_chars);
+
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __HARDWARE_H */
+#endif /* __UTILS_H */

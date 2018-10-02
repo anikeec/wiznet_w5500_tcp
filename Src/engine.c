@@ -4,15 +4,20 @@
 #include "main.h"
 #include "network.h"
 #include "engine.h"
+#include "hardware.h"
+#include "utils.h"
 #include "./../Json/cJSON.h"
 #include <string.h>
 
 /* External variables --------------------------------------------------------*/
 
-/* Private variables ---------------------------------------------------------*/
+/* Private functions ---------------------------------------------------------*/
 int8_t	parseAccessPacket(struct AccessPacket* accessPacket);
 int8_t	parseInfoPacket(struct InfoPacket* infoPacket);
 int8_t	parseServicePacket(struct ServicePacket* servicePacket);
+
+/* Private variables ---------------------------------------------------------*/
+DateTime dateTime;
 
 /* Functions -----------------------------------------------------------------*/
 
@@ -33,6 +38,8 @@ int createAccessMessage(
 	cJSON *cardNumberJson = NULL;
 	cJSON *eventTypeJson = NULL;
 	cJSON *eventIdJson = NULL;
+	cJSON *dateJson = NULL;	
+	char *dateTimeBuffer; 
 														
 	cJSON *message = cJSON_CreateObject();													
 	if (message == NULL) {
@@ -74,6 +81,14 @@ int createAccessMessage(
 		return 0;
   }	
 	cJSON_AddItemToObject(message, "ei", eventIdJson);
+	
+	rtcGetDateTime(&dateTime);
+	dateTimeBuffer = dateTimeToJsonDate(dateTime);
+	dateJson = cJSON_CreateString(dateTimeBuffer);
+	if (dateJson == NULL) {
+		return 0;
+  }	
+	cJSON_AddItemToObject(message, "t", dateJson);
 	
 	string = cJSON_Print(message);
 	if (string == NULL) {

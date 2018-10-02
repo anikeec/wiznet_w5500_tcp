@@ -99,8 +99,10 @@ void SystemClock_Config(void)
 void MX_RTC_Init(void)
 {
 
-    /**Initialize RTC Only 
-    */
+    /**Initialize RTC Only */
+	RTC_TimeTypeDef sTime;
+	RTC_DateTypeDef sDate;
+	
   hrtc.Instance = RTC;
   hrtc.Init.AsynchPrediv = RTC_AUTO_1_SECOND;
   hrtc.Init.OutPut = RTC_OUTPUTSOURCE_ALARM;
@@ -108,7 +110,17 @@ void MX_RTC_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-
+	
+	sTime.Hours = 18;
+  sTime.Minutes = 50;
+  sTime.Seconds = 0;
+  HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+	
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_OCTOBER;
+  sDate.Date = 2;
+  sDate.Year = 18;
+  HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 }
 
 	/* SPI1 init function */
@@ -220,4 +232,23 @@ uint8_t wizchipReadByte()
 	HAL_SPI_Receive(&hspi1, buffer, 1, 5);
 	while(HAL_SPI_GetState(&hspi1) != HAL_SPI_STATE_READY){};
 	return buffer[0];
+}
+
+/*------------------------------------------------------*/
+//rtcGetDateTime
+/*------------------------------------------------------*/
+void rtcGetDateTime(DateTime* dateTime) {
+	RTC_TimeTypeDef sTime;
+	RTC_DateTypeDef sDate;
+	uint8_t hours, minutes, seconds;
+	
+	HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
+	dateTime->year = sDate.Year;
+	dateTime->month = sDate.Month;
+	dateTime->day = sDate.Date;
+	
+	HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BIN);
+	dateTime->hours = sTime.Hours;
+	dateTime->minutes = sTime.Minutes;
+	dateTime->seconds = sTime.Seconds;
 }
