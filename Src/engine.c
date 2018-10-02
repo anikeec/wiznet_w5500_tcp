@@ -10,7 +10,9 @@
 /* External variables --------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-
+int8_t	parseAccessPacket(struct AccessPacket* accessPacket);
+int8_t	parseInfoPacket(struct InfoPacket* infoPacket);
+int8_t	parseServicePacket(struct ServicePacket* servicePacket);
 
 /* Functions -----------------------------------------------------------------*/
 
@@ -83,15 +85,70 @@ int createAccessMessage(
 	cJSON_Delete(message);
 	
 	return 1;
-}
-		
+}		
+
+
 /*------------------------------------------------------*/
 //parseServerAnswer
 /*------------------------------------------------------*/
 int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
-	dataAmount++;
+	struct AccessPacket accessPacket;
+	struct InfoPacket infoPacket;
+	struct ServicePacket servicePacket;
+	cJSON *messageTypeJson = NULL;	
+	int compare = 0;
+	char	messageType[MESSAGE_TYPE_LENGTH];
+	
+	cJSON *json_result = cJSON_Parse((char*)dataBuffer);
+	if(json_result == NULL) {
+		return FALSE;
+	}
+	
+	messageTypeJson = cJSON_GetObjectItemCaseSensitive(json_result, "mt");
+	if (cJSON_IsString(messageTypeJson) && (messageTypeJson->valuestring != NULL)) {
+		memset(messageType, NULL, MESSAGE_TYPE_LENGTH);
+    strlcpy(messageType, messageTypeJson->valuestring, strlen(messageTypeJson->valuestring) + 1);
+  } else {
+		return FALSE;
+	}
+	
+	compare = strcmp(messageType,ACCESS_MESSAGE_TYPE);
+	if(compare == 0) {
+		return parseAccessPacket(&accessPacket);
+	}
+	
+	compare = strcmp(messageType,INFO_MESSAGE_TYPE);
+	if(compare == 0) {
+		return parseInfoPacket(&infoPacket);
+	}
+	
+	compare = strcmp(messageType,SERVICE_MESSAGE_TYPE);
+	if(compare == 0) {
+		return parseServicePacket(&servicePacket);
+	}
 	
 	return 0;
+}
+
+/*------------------------------------------------------*/
+//parseAccessPacket
+/*------------------------------------------------------*/
+int8_t	parseAccessPacket(struct AccessPacket* accessPacket) {
+	return 1;
+}
+
+/*------------------------------------------------------*/
+//parseInfoPacket
+/*------------------------------------------------------*/
+int8_t	parseInfoPacket(struct InfoPacket* infoPacket) {
+	return 2;
+}
+
+/*------------------------------------------------------*/
+//parseServicePacket
+/*------------------------------------------------------*/
+int8_t	parseServicePacket(struct ServicePacket* servicePacket) {
+	return 3;
 }
 
 /*------------------------------------------------------*/
