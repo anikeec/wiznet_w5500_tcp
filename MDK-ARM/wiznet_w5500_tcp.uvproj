@@ -430,6 +430,26 @@
               <FileType>1</FileType>
               <FilePath>../Src/stm32f1xx_hal_msp.c</FilePath>
             </File>
+            <File>
+              <FileName>network.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\network.c</FilePath>
+            </File>
+            <File>
+              <FileName>hardware.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\hardware.c</FilePath>
+            </File>
+            <File>
+              <FileName>engine.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\engine.c</FilePath>
+            </File>
+            <File>
+              <FileName>utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\utils.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -505,6 +525,11 @@
               <FileType>1</FileType>
               <FilePath>../Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f1xx_hal_rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rtc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -569,14 +594,24 @@
           <GroupName>Json</GroupName>
           <Files>
             <File>
-              <FileName>parson.c</FileName>
+              <FileName>cJSON.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Json\parson.c</FilePath>
+              <FilePath>..\Json\cJSON.c</FilePath>
             </File>
             <File>
-              <FileName>parson.h</FileName>
+              <FileName>cJSON.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\Json\parson.h</FilePath>
+              <FilePath>..\Json\cJSON.h</FilePath>
+            </File>
+            <File>
+              <FileName>cJSON_Utils.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Json\cJSON_Utils.c</FilePath>
+            </File>
+            <File>
+              <FileName>cJSON_Utils.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Json\cJSON_Utils.h</FilePath>
             </File>
           </Files>
         </Group>
