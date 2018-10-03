@@ -19,7 +19,7 @@
 #define EVENT_TYPE_LENGTH			10
 	 
 /* Exported types ------------------------------------------------------------*/
-struct AccessPacket {
+struct AccessPacketType {
 	char			messageType[MESSAGE_TYPE_LENGTH];
 	uint32_t 	deviceNumber;
 	uint32_t 	packetNumber;
@@ -28,15 +28,21 @@ struct AccessPacket {
 	uint32_t 	eventId;
 };
 
-struct InfoPacket {
+typedef struct AccessPacketType	AccessPacket;
+
+struct InfoPacketType {
 	char			messageType[MESSAGE_TYPE_LENGTH];
 	
 };
 
-struct ServicePacket {
+typedef struct InfoPacketType		InfoPacket;
+
+struct ServicePacketType {
 	char			messageType[MESSAGE_TYPE_LENGTH];
 	
 };
+
+typedef struct ServicePacketType	ServicePacket;
 	 
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/

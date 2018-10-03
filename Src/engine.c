@@ -12,9 +12,9 @@
 /* External variables --------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-int8_t	parseAccessPacket(struct AccessPacket* accessPacket);
-int8_t	parseInfoPacket(struct InfoPacket* infoPacket);
-int8_t	parseServicePacket(struct ServicePacket* servicePacket);
+int8_t	parseAccessPacket(AccessPacket* accessPacket);
+int8_t	parseInfoPacket(InfoPacket* infoPacket);
+int8_t	parseServicePacket(ServicePacket* servicePacket);
 
 /* Private variables ---------------------------------------------------------*/
 DateTime dateTime;
@@ -107,9 +107,9 @@ int createAccessMessage(
 //parseServerAnswer
 /*------------------------------------------------------*/
 int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
-	struct AccessPacket accessPacket;
-	struct InfoPacket infoPacket;
-	struct ServicePacket servicePacket;
+	AccessPacket accessPacket;
+	InfoPacket infoPacket;
+	ServicePacket servicePacket;
 	cJSON *messageTypeJson = NULL;	
 	int compare = 0;
 	char	messageType[MESSAGE_TYPE_LENGTH];
@@ -148,21 +148,21 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 /*------------------------------------------------------*/
 //parseAccessPacket
 /*------------------------------------------------------*/
-int8_t	parseAccessPacket(struct AccessPacket* accessPacket) {
+int8_t	parseAccessPacket(AccessPacket* accessPacket) {
 	return 1;
 }
 
 /*------------------------------------------------------*/
 //parseInfoPacket
 /*------------------------------------------------------*/
-int8_t	parseInfoPacket(struct InfoPacket* infoPacket) {
+int8_t	parseInfoPacket(InfoPacket* infoPacket) {
 	return 2;
 }
 
 /*------------------------------------------------------*/
 //parseServicePacket
 /*------------------------------------------------------*/
-int8_t	parseServicePacket(struct ServicePacket* servicePacket) {
+int8_t	parseServicePacket(ServicePacket* servicePacket) {
 	return 3;
 }
 
