@@ -224,30 +224,22 @@ int8_t	parseInfoPacket(cJSON *json, InfoPacket* infoPacket) {
 	cardNumberJson = cJSON_GetObjectItemCaseSensitive(json, "cn");
 	if (cJSON_IsString(cardNumberJson) && (cardNumberJson->valuestring != NULL)) {
     strlcpy(infoPacket->cardNumber, cardNumberJson->valuestring, strlen(infoPacket->cardNumber));
-  } else {
-		return FALSE;
-	}
+  }
 	
 	userIdJson = cJSON_GetObjectItemCaseSensitive(json, "ui");
 	if (cJSON_IsNumber(userIdJson) && (userIdJson->valueint != NULL)) {
     infoPacket->userId = userIdJson->valueint;
-  } else {
-		return FALSE;
-	}
+  }
 	
 	eventTypeJson = cJSON_GetObjectItemCaseSensitive(json, "et");
 	if (cJSON_IsString(eventTypeJson) && (eventTypeJson->valuestring != NULL)) {
     strlcpy(infoPacket->eventType, eventTypeJson->valuestring, strlen(infoPacket->eventType));
-  } else {
-		return FALSE;
-	}
+  }
 	
 	eventIdJson = cJSON_GetObjectItemCaseSensitive(json, "ei");
 	if (cJSON_IsNumber(eventIdJson) && (eventIdJson->valueint != NULL)) {
     infoPacket->eventId = eventIdJson->valueint;
-  } else {
-		return FALSE;
-	}
+  }
 	
 	return INFO_MESSAGE;
 }
