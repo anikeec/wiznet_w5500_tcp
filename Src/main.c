@@ -41,7 +41,7 @@ int main(void)
 		
   while (1)
   {
-			createAccessMessage(&message,1,2,cardNumber,"ENTER_QUERY",3);
+			createAccessMessage(&message,11,2,cardNumber,"ENTER_QUERY",3);
 			length = strlen(message);
 			memset(buffer,NULL,MESSAGE_MAX_LENGTH);
 			strlcpy(buffer,message,length+1);

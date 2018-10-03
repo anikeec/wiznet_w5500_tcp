@@ -240,7 +240,6 @@ uint8_t wizchipReadByte()
 void rtcGetDateTime(DateTime* dateTime) {
 	RTC_TimeTypeDef sTime;
 	RTC_DateTypeDef sDate;
-	uint8_t hours, minutes, seconds;
 	
 	HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BIN);
 	dateTime->year = sDate.Year;
