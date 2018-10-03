@@ -27,7 +27,7 @@ int main(void)
 {		
 	char* message;
 	//int* messageLength;
-	char* cardNumber = "123456";
+	char* cardNumber = "11111111";
 	int length = 0;
 	
 	uint8_t retValue = 0;
@@ -47,7 +47,7 @@ int main(void)
 		
   while (1)
   {
-			createAccessMessage(&message,1,2,cardNumber,"EXIT_QUERY",8);
+			createAccessMessage(&message,11,2,cardNumber,"ENTER_QUERY",3);
 			length = strlen(message);
 			memset(buffer,NULL,MESSAGE_MAX_LENGTH);
 			strlcpy(buffer,message,length+1);
