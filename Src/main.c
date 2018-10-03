@@ -29,6 +29,7 @@ int main(void)
 	//int* messageLength;
 	char* cardNumber = "11111111";
 	int length = 0;
+	int8_t	result = 0;
 	
 	uint8_t retValue = 0;
 	int16_t receivedResult = 0;	
@@ -47,7 +48,7 @@ int main(void)
 		
   while (1)
   {
-			createAccessMessage(&message,11,2,cardNumber,"ENTER_QUERY",3);
+			createAccessMessage(&message,1,2,cardNumber,"ENTER_QUERY",3);
 			length = strlen(message);
 			memset(buffer,NULL,MESSAGE_MAX_LENGTH);
 			strlcpy(buffer,message,length+1);
@@ -63,7 +64,8 @@ int main(void)
 			receivedResult = receiveServerAnswer(NETWORK_SOCKET, gDATABUF, DATA_BUF_SIZE, NW_SERVER_PORT);
 			if(receivedResult > 0) {
 				//we can parse result in the gDATABUF
-				parseServerAnswer(gDATABUF, receivedResult);
+				result = parseServerAnswer(gDATABUF, receivedResult);
+				handleServerAnswer(result);
 			}				
 			networkTcpDisconnect(NETWORK_SOCKET);
   }

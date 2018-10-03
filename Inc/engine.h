@@ -14,6 +14,11 @@
 #define INFO_MESSAGE_TYPE				"INFO"
 #define SERVICE_MESSAGE_TYPE		"SERVICE"	 
 	 
+#define EVENT_TYPE_ACCESS_ALLOW		1
+#define EVENT_TYPE_ACCESS_DENIED	2
+#define EVENT_TYPE_ENTER_QUERY		3
+#define EVENT_TYPE_EXIT_QUERY			4
+	 
 #define MESSAGE_TYPE_LENGTH		10
 #define CARD_NUMBER_LENGTH		10
 #define EVENT_TYPE_LENGTH			10
@@ -34,7 +39,10 @@ struct InfoPacketType {
 	char			messageType[MESSAGE_TYPE_LENGTH];
 	uint32_t 	deviceNumber;
 	uint32_t 	packetNumber;
-	
+	char			cardNumber[CARD_NUMBER_LENGTH];
+	uint32_t	userId;
+	char 			eventType[EVENT_TYPE_LENGTH];
+	uint32_t 	eventId;
 };
 
 typedef struct InfoPacketType		InfoPacket;
@@ -61,6 +69,7 @@ int createAccessMessage(
 													int eventId);
 
 int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount);
+void 		handleServerAnswer(int8_t receivedPacketType);
 
 #ifdef __cplusplus
 }

@@ -11,6 +11,16 @@
 
 /* External variables --------------------------------------------------------*/
 
+/* Public variables ----------------------------------------------------------*/
+AccessPacket accessPacket;
+InfoPacket infoPacket;
+ServicePacket servicePacket;
+
+/* Private definitions--------------------------------------------------------*/
+#define ACCESS_MESSAGE			1
+#define INFO_MESSAGE				2
+#define	SERVICE_MESSAGE			3
+
 /* Private functions ---------------------------------------------------------*/
 int8_t	parseAccessPacket(cJSON *json, AccessPacket* accessPacket);
 int8_t	parseInfoPacket(cJSON *json, InfoPacket* infoPacket);
@@ -100,16 +110,29 @@ int createAccessMessage(
 	cJSON_Delete(message);
 	
 	return 1;
-}		
+}	
 
+/*------------------------------------------------------*/
+//handleServerAnswer
+/*------------------------------------------------------*/
+void handleServerAnswer(int8_t receivedPacketType) {
+	if(receivedPacketType == ACCESS_MESSAGE) {
+		
+	} else
+	if(receivedPacketType == INFO_MESSAGE) {
+		
+	} else	
+	if(receivedPacketType == SERVICE_MESSAGE) {
+		
+	} else {
+		
+	}
+}
 
 /*------------------------------------------------------*/
 //parseServerAnswer
 /*------------------------------------------------------*/
-int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
-	AccessPacket accessPacket;
-	InfoPacket infoPacket;
-	ServicePacket servicePacket;
+int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {	
 	cJSON *messageTypeJson = NULL;
 	cJSON *deviceNumberJson = NULL;
 	cJSON *packetNumberJson = NULL;	
@@ -155,7 +178,7 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 	
 	compare = strcmp(messageType,INFO_MESSAGE_TYPE);
 	if(compare == 0) {
-		strlcpy(infoPacket.messageType, messageType, strlen(accessPacket.messageType));
+		strlcpy(infoPacket.messageType, messageType, strlen(infoPacket.messageType));
 		infoPacket.deviceNumber = deviceNumber;
 		infoPacket.packetNumber = packetNumber;
 		return parseInfoPacket(json_result, &infoPacket);
@@ -163,13 +186,13 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 	
 	compare = strcmp(messageType,SERVICE_MESSAGE_TYPE);
 	if(compare == 0) {
-		strlcpy(servicePacket.messageType, messageType, strlen(accessPacket.messageType));
+		strlcpy(servicePacket.messageType, messageType, strlen(servicePacket.messageType));
 		servicePacket.deviceNumber = deviceNumber;
 		servicePacket.packetNumber = packetNumber;
 		return parseServicePacket(json_result, &servicePacket);
 	}
 	
-	return 0;
+	return FALSE;
 }
 
 /*------------------------------------------------------*/
@@ -177,8 +200,7 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 //{"mt":"ACCESS","ei":1,"dn":11,"pn":2,"t":"Oct 3, 2018 11:44:08 AM"}
 /*------------------------------------------------------*/
 int8_t	parseAccessPacket(cJSON *json, AccessPacket* accessPacket) {
-	cJSON *eventIdJson = NULL;	
-	int eventId = 0;	
+	cJSON *eventIdJson = NULL;		
 		
 	eventIdJson = cJSON_GetObjectItemCaseSensitive(json, "ei");
 	if (cJSON_IsNumber(eventIdJson) && (eventIdJson->valueint != NULL)) {
@@ -187,21 +209,54 @@ int8_t	parseAccessPacket(cJSON *json, AccessPacket* accessPacket) {
 		return FALSE;
 	}	
 	
-	return 1;
+	return ACCESS_MESSAGE;
 }
 
 /*------------------------------------------------------*/
 //parseInfoPacket
 /*------------------------------------------------------*/
 int8_t	parseInfoPacket(cJSON *json, InfoPacket* infoPacket) {
-	return 2;
+	cJSON *cardNumberJson = NULL;
+	cJSON *userIdJson = NULL;
+	cJSON *eventTypeJson = NULL;
+	cJSON *eventIdJson = NULL;
+	
+	cardNumberJson = cJSON_GetObjectItemCaseSensitive(json, "cn");
+	if (cJSON_IsString(cardNumberJson) && (cardNumberJson->valuestring != NULL)) {
+    strlcpy(infoPacket->cardNumber, cardNumberJson->valuestring, strlen(infoPacket->cardNumber));
+  } else {
+		return FALSE;
+	}
+	
+	userIdJson = cJSON_GetObjectItemCaseSensitive(json, "ui");
+	if (cJSON_IsNumber(userIdJson) && (userIdJson->valueint != NULL)) {
+    infoPacket->userId = userIdJson->valueint;
+  } else {
+		return FALSE;
+	}
+	
+	eventTypeJson = cJSON_GetObjectItemCaseSensitive(json, "et");
+	if (cJSON_IsString(eventTypeJson) && (eventTypeJson->valuestring != NULL)) {
+    strlcpy(infoPacket->eventType, eventTypeJson->valuestring, strlen(infoPacket->eventType));
+  } else {
+		return FALSE;
+	}
+	
+	eventIdJson = cJSON_GetObjectItemCaseSensitive(json, "ei");
+	if (cJSON_IsNumber(eventIdJson) && (eventIdJson->valueint != NULL)) {
+    infoPacket->eventId = eventIdJson->valueint;
+  } else {
+		return FALSE;
+	}
+	
+	return INFO_MESSAGE;
 }
 
 /*------------------------------------------------------*/
 //parseServicePacket
 /*------------------------------------------------------*/
 int8_t	parseServicePacket(cJSON *json, ServicePacket* servicePacket) {
-	return 3;
+	return SERVICE_MESSAGE;
 }
 
 /*------------------------------------------------------*/
