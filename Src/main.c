@@ -34,14 +34,7 @@ int main(void)
 	uint8_t retValue = 0;
 	int16_t receivedResult = 0;	
 	uint8_t addr[4] = {NW_SERVER_ADDR0, NW_SERVER_ADDR1, NW_SERVER_ADDR2, NW_SERVER_ADDR3};
-/*		
-		while(1) {
-			//jsonParserTest();
-			createAccessMessage(&message,messageLength,1,2,cardNumber,6,7,8);
-			length = strlen(message);
-			length += 1;
-		}
-*/	
+
 	hardwareInit();
 	
 	networkInit();

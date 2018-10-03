@@ -59,7 +59,6 @@ typedef struct ServicePacketType	ServicePacket;
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void jsonParserTest(void);
 int createAccessMessage(
 													char** result, 
 													int deviceNumber,
