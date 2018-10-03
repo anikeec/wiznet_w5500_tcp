@@ -8,7 +8,7 @@
 #define DATA_BUF_SIZE   2048
 #define TEMP_BUF_SIZE 	10
 
-#define MESSAGE_MAX_LENGTH	100
+#define MESSAGE_MAX_LENGTH	200
 
 #define SPI_RST_PORT 		GPIOA
 #define SPI_RST_PIN 		GPIO_PIN_2
