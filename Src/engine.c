@@ -140,59 +140,70 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 	char	messageType[MESSAGE_TYPE_LENGTH];
 	int deviceNumber = 0;
 	int packetNumber = 0;
+	int8_t retValue = TRUE;
 	
 	cJSON *json_result = cJSON_Parse((char*)dataBuffer);
 	if(json_result == NULL) {
-		return FALSE;
+		retValue = FALSE;
 	}
 	
-	messageTypeJson = cJSON_GetObjectItemCaseSensitive(json_result, "mt");
-	if (cJSON_IsString(messageTypeJson) && (messageTypeJson->valuestring != NULL)) {
-		memset(messageType, NULL, MESSAGE_TYPE_LENGTH);
-    strlcpy(messageType, messageTypeJson->valuestring, strlen(messageTypeJson->valuestring) + 1);
-  } else {
-		return FALSE;
+	if(retValue != FALSE) {
+		messageTypeJson = cJSON_GetObjectItemCaseSensitive(json_result, "mt");
+		if (cJSON_IsString(messageTypeJson) && (messageTypeJson->valuestring != NULL)) {
+			memset(messageType, NULL, MESSAGE_TYPE_LENGTH);
+			strlcpy(messageType, messageTypeJson->valuestring, strlen(messageTypeJson->valuestring) + 1);
+		} else {
+			retValue = FALSE;
+		}
 	}
 	
-	deviceNumberJson = cJSON_GetObjectItemCaseSensitive(json_result, "dn");
-	if (cJSON_IsNumber(deviceNumberJson) && (deviceNumberJson->valueint != NULL)) {
-		deviceNumber = deviceNumberJson->valueint;
-  } else {
-		return FALSE;
+	if(retValue != FALSE) {
+		deviceNumberJson = cJSON_GetObjectItemCaseSensitive(json_result, "dn");
+		if (cJSON_IsNumber(deviceNumberJson) && (deviceNumberJson->valueint != NULL)) {
+			deviceNumber = deviceNumberJson->valueint;
+		} else {
+			retValue = FALSE;
+		}
 	}
 	
-	packetNumberJson = cJSON_GetObjectItemCaseSensitive(json_result, "pn");
-	if (cJSON_IsNumber(packetNumberJson) && (packetNumberJson->valueint != NULL)) {
-		packetNumber = packetNumberJson->valueint;
-  } else {
-		return FALSE;
+	if(retValue != FALSE) {
+		packetNumberJson = cJSON_GetObjectItemCaseSensitive(json_result, "pn");
+		if (cJSON_IsNumber(packetNumberJson) && (packetNumberJson->valueint != NULL)) {
+			packetNumber = packetNumberJson->valueint;
+		} else {
+			retValue = FALSE;
+		}
 	}
 	
-	compare = strcmp(messageType,ACCESS_MESSAGE_TYPE);
-	if(compare == 0) {
-		strlcpy(accessPacket.messageType, messageType, strlen(accessPacket.messageType));
-		accessPacket.deviceNumber = deviceNumber;
-		accessPacket.packetNumber = packetNumber;
-		return parseAccessPacket(json_result, &accessPacket);
+	if(retValue != FALSE) {
+		compare = strcmp(messageType,ACCESS_MESSAGE_TYPE);
+		if(compare == 0) {
+			strlcpy(accessPacket.messageType, messageType, strlen(accessPacket.messageType));
+			accessPacket.deviceNumber = deviceNumber;
+			accessPacket.packetNumber = packetNumber;
+			retValue = parseAccessPacket(json_result, &accessPacket);
+		}
+		
+		compare = strcmp(messageType,INFO_MESSAGE_TYPE);
+		if(compare == 0) {
+			strlcpy(infoPacket.messageType, messageType, strlen(infoPacket.messageType));
+			infoPacket.deviceNumber = deviceNumber;
+			infoPacket.packetNumber = packetNumber;
+			retValue = parseInfoPacket(json_result, &infoPacket);
+		}
+
+		compare = strcmp(messageType,SERVICE_MESSAGE_TYPE);
+		if(compare == 0) {
+			strlcpy(servicePacket.messageType, messageType, strlen(servicePacket.messageType));
+			servicePacket.deviceNumber = deviceNumber;
+			servicePacket.packetNumber = packetNumber;
+			retValue = parseServicePacket(json_result, &servicePacket);
+		}
 	}
 	
-	compare = strcmp(messageType,INFO_MESSAGE_TYPE);
-	if(compare == 0) {
-		strlcpy(infoPacket.messageType, messageType, strlen(infoPacket.messageType));
-		infoPacket.deviceNumber = deviceNumber;
-		infoPacket.packetNumber = packetNumber;
-		return parseInfoPacket(json_result, &infoPacket);
-	}
+	cJSON_Delete(json_result);
 	
-	compare = strcmp(messageType,SERVICE_MESSAGE_TYPE);
-	if(compare == 0) {
-		strlcpy(servicePacket.messageType, messageType, strlen(servicePacket.messageType));
-		servicePacket.deviceNumber = deviceNumber;
-		servicePacket.packetNumber = packetNumber;
-		return parseServicePacket(json_result, &servicePacket);
-	}
-	
-	return FALSE;
+	return retValue;
 }
 
 /*------------------------------------------------------*/
