@@ -32,6 +32,8 @@ typedef struct AccessPacketType	AccessPacket;
 
 struct InfoPacketType {
 	char			messageType[MESSAGE_TYPE_LENGTH];
+	uint32_t 	deviceNumber;
+	uint32_t 	packetNumber;
 	
 };
 
@@ -39,6 +41,8 @@ typedef struct InfoPacketType		InfoPacket;
 
 struct ServicePacketType {
 	char			messageType[MESSAGE_TYPE_LENGTH];
+	uint32_t 	deviceNumber;
+	uint32_t 	packetNumber;
 	
 };
 

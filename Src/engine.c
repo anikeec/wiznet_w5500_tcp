@@ -12,9 +12,9 @@
 /* External variables --------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-int8_t	parseAccessPacket(AccessPacket* accessPacket);
-int8_t	parseInfoPacket(InfoPacket* infoPacket);
-int8_t	parseServicePacket(ServicePacket* servicePacket);
+int8_t	parseAccessPacket(cJSON *json, AccessPacket* accessPacket);
+int8_t	parseInfoPacket(cJSON *json, InfoPacket* infoPacket);
+int8_t	parseServicePacket(cJSON *json, ServicePacket* servicePacket);
 
 /* Private variables ---------------------------------------------------------*/
 DateTime dateTime;
@@ -110,9 +110,13 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 	AccessPacket accessPacket;
 	InfoPacket infoPacket;
 	ServicePacket servicePacket;
-	cJSON *messageTypeJson = NULL;	
+	cJSON *messageTypeJson = NULL;
+	cJSON *deviceNumberJson = NULL;
+	cJSON *packetNumberJson = NULL;	
 	int compare = 0;
 	char	messageType[MESSAGE_TYPE_LENGTH];
+	int deviceNumber = 0;
+	int packetNumber = 0;
 	
 	cJSON *json_result = cJSON_Parse((char*)dataBuffer);
 	if(json_result == NULL) {
@@ -127,19 +131,42 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 		return FALSE;
 	}
 	
+	deviceNumberJson = cJSON_GetObjectItemCaseSensitive(json_result, "dn");
+	if (cJSON_IsNumber(deviceNumberJson) && (deviceNumberJson->valueint != NULL)) {
+		deviceNumber = deviceNumberJson->valueint;
+  } else {
+		return FALSE;
+	}
+	
+	packetNumberJson = cJSON_GetObjectItemCaseSensitive(json_result, "pn");
+	if (cJSON_IsNumber(packetNumberJson) && (packetNumberJson->valueint != NULL)) {
+		packetNumber = packetNumberJson->valueint;
+  } else {
+		return FALSE;
+	}
+	
 	compare = strcmp(messageType,ACCESS_MESSAGE_TYPE);
 	if(compare == 0) {
-		return parseAccessPacket(&accessPacket);
+		strlcpy(accessPacket.messageType, messageType, strlen(accessPacket.messageType));
+		accessPacket.deviceNumber = deviceNumber;
+		accessPacket.packetNumber = packetNumber;
+		return parseAccessPacket(json_result, &accessPacket);
 	}
 	
 	compare = strcmp(messageType,INFO_MESSAGE_TYPE);
 	if(compare == 0) {
-		return parseInfoPacket(&infoPacket);
+		strlcpy(infoPacket.messageType, messageType, strlen(accessPacket.messageType));
+		infoPacket.deviceNumber = deviceNumber;
+		infoPacket.packetNumber = packetNumber;
+		return parseInfoPacket(json_result, &infoPacket);
 	}
 	
 	compare = strcmp(messageType,SERVICE_MESSAGE_TYPE);
 	if(compare == 0) {
-		return parseServicePacket(&servicePacket);
+		strlcpy(servicePacket.messageType, messageType, strlen(accessPacket.messageType));
+		servicePacket.deviceNumber = deviceNumber;
+		servicePacket.packetNumber = packetNumber;
+		return parseServicePacket(json_result, &servicePacket);
 	}
 	
 	return 0;
@@ -147,22 +174,33 @@ int8_t	parseServerAnswer(uint8_t* dataBuffer, uint16_t dataAmount) {
 
 /*------------------------------------------------------*/
 //parseAccessPacket
+//{"mt":"ACCESS","ei":1,"dn":11,"pn":2,"t":"Oct 3, 2018 11:44:08 AM"}
 /*------------------------------------------------------*/
-int8_t	parseAccessPacket(AccessPacket* accessPacket) {
+int8_t	parseAccessPacket(cJSON *json, AccessPacket* accessPacket) {
+	cJSON *eventIdJson = NULL;	
+	int eventId = 0;	
+		
+	eventIdJson = cJSON_GetObjectItemCaseSensitive(json, "ei");
+	if (cJSON_IsNumber(eventIdJson) && (eventIdJson->valueint != NULL)) {
+		accessPacket->eventId = eventIdJson->valueint;
+  } else {
+		return FALSE;
+	}	
+	
 	return 1;
 }
 
 /*------------------------------------------------------*/
 //parseInfoPacket
 /*------------------------------------------------------*/
-int8_t	parseInfoPacket(InfoPacket* infoPacket) {
+int8_t	parseInfoPacket(cJSON *json, InfoPacket* infoPacket) {
 	return 2;
 }
 
 /*------------------------------------------------------*/
 //parseServicePacket
 /*------------------------------------------------------*/
-int8_t	parseServicePacket(ServicePacket* servicePacket) {
+int8_t	parseServicePacket(cJSON *json, ServicePacket* servicePacket) {
 	return 3;
 }
 
