@@ -30,40 +30,40 @@ char* dateTimeToJsonDate(DateTime dateTime) {
 
 	//month
 	switch(dateTime.month) {
-		case 1:
+		case 0x01:
 						monthJson = "Jan";
 						break;
-		case 2:
+		case 0x02:
 						monthJson = "Feb";
 						break;
-		case 3:
+		case 0x03:
 						monthJson = "Mar";
 						break;
-		case 4:
+		case 0x04:
 						monthJson = "Apr";
 						break;
-		case 5:
+		case 0x05:
 						monthJson = "May";
 						break;
-		case 6:
+		case 0x06:
 						monthJson = "Jun";
 						break;
-		case 7:
+		case 0x07:
 						monthJson = "Jul";
 						break;
-		case 8:
+		case 0x08:
 						monthJson = "Aug";
 						break;
-		case 9:
+		case 0x09:
 						monthJson = "Sep";
 						break;
-		case 10:
+		case 0x10:
 						monthJson = "Oct";
 						break;
-		case 11:
+		case 0x11:
 						monthJson = "Nov";
 						break;
-		case 12:
+		case 0x12:
 						monthJson = "Dec";
 						break;
 		default:
@@ -120,8 +120,8 @@ void insert2NumberToBuffer(uint8_t number, char* buffer) {
 	if(number > 99)
 		number = number%100;
 	uint8ToChars(number, (uint8_t*)tempBuffer);
-	buffer[0] = tempBuffer[1];
-	buffer[1] = tempBuffer[0];
+	buffer[0] = '0' + tempBuffer[1];
+	buffer[1] = '0' + tempBuffer[0];
 }
 
 /*------------------------------------------------------*/
