@@ -11,12 +11,14 @@
 /* Private variables ---------------------------------------------------------*/
 RTC_HandleTypeDef hrtc;
 SPI_HandleTypeDef hspi1;
+UART_HandleTypeDef huart1;
 
 /* Private functions ---------------------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RTC_Init(void);
+static void MX_USART1_UART_Init(void);
 
 /* Functions -----------------------------------------------------------------*/
 
@@ -38,6 +40,11 @@ void hardwareInit(void) {
   MX_GPIO_Init();
 	MX_RTC_Init();
   MX_SPI1_Init();
+	MX_USART1_UART_Init();
+	
+	/* Enable USART1 interrupt */
+  HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(USART1_IRQn);
 	
 	wizchipReset();
 	wizchipUnreset();
@@ -143,6 +150,25 @@ void MX_SPI1_Init(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+}
+
+/* USART1 init function */
+static void MX_USART1_UART_Init(void)
+{
+
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 9600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
 }
 
 /** Configure pins as 
@@ -251,3 +277,4 @@ void rtcGetDateTime(DateTime* dateTime) {
 	dateTime->minutes = sTime.Minutes;
 	dateTime->seconds = sTime.Seconds;
 }
+

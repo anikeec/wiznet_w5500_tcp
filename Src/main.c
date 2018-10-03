@@ -15,6 +15,7 @@ extern "C"
 #include "network.h"
 #include "hardware.h"
 #include "engine.h"
+#include "uart.h"
 #include <string.h>
 
 /* Public variables ----------------------------------------------------------*/
@@ -36,6 +37,11 @@ int main(void)
 	uint8_t addr[4] = {NW_SERVER_ADDR0, NW_SERVER_ADDR1, NW_SERVER_ADDR2, NW_SERVER_ADDR3};
 
 	hardwareInit();
+	
+	while(1) {
+		UART1_SendData(addr, 4);
+		while(1){};
+	}
 	
 	networkInit();
 		
