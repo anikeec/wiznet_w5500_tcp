@@ -6,14 +6,13 @@
 #include <string.h>
 
 /* Definitions----------------------------------------------------------------*/
-#define DATE_TIME_SUF_SIZE	27
 
 /* External variables --------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 char dateTimeBuffer[DATE_TIME_SUF_SIZE];
 
-
+/* Private functions ---------------------------------------------------------*/
 void insert2NumberToBuffer(uint8_t number, char* buffer);
 
 /* Functions -----------------------------------------------------------------*/

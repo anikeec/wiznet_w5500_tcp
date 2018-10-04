@@ -2,9 +2,7 @@
 #define RING_BUFFER_H__
 
 #include <stdint.h>
-
-
-#define RING_BUFFER_LENGTH 200
+#include "definitions.h"
 
 typedef struct {
 	uint8_t buf[RING_BUFFER_LENGTH];

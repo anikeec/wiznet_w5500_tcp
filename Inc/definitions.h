@@ -2,13 +2,44 @@
 #ifndef __DEFINITIONS_H
 #define __DEFINITIONS_H
 
-/* Definitions----------------------------------------------------------------*/
-#define _WIZCHIP_ 			5500
-
+/* Definitions of buffer------------------------------------------------------*/
+//main
 #define DATA_BUF_SIZE   2048
 #define TEMP_BUF_SIZE 	10
-
 #define MESSAGE_MAX_LENGTH	200
+
+//network
+//-
+
+//hardware
+//-
+
+//engine
+//-
+
+//utils
+#define DATE_TIME_SUF_SIZE	27
+
+//uart
+#define RING_BUFFER_LENGTH 200
+
+/*
+		summary:
+			DATA_BUF_SIZE	- 2048
+			TEMP_BUF_SIZE	- 10
+			MESSAGE_MAX_LENGTH - 200
+			DATE_TIME_SUF_SIZE - 27
+			RING_BUFFER_LENGTH - 200*2 = 400
+			------------------ - 2685
+			
+		heap:
+						1024
+		stack:
+						2048
+*/
+
+/* Definitions----------------------------------------------------------------*/
+#define _WIZCHIP_ 			5500
 
 #define SPI_RST_PORT 		GPIOA
 #define SPI_RST_PIN 		GPIO_PIN_2
