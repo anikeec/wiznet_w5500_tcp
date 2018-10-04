@@ -39,7 +39,10 @@ uint8_t networkTcpConnect(uint8_t socketNumber, uint8_t* addr, uint16_t port) {
 //networkDisconnect
 /*------------------------------------------------------*/
 uint8_t networkTcpDisconnect(uint8_t socketNumber) {
-	disconnect(0);
+	uint8_t ret;
+	do {
+	ret = disconnect(socketNumber);
+	} while(ret != SOCK_OK);
 	return TRUE;
 }
 
