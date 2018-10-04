@@ -26,6 +26,18 @@ char readBuf[1];
 /* Functions -----------------------------------------------------------------*/
 
 /*------------------------------------------------------*/
+//UART1_SendStringAndWait
+/*------------------------------------------------------*/
+uint8_t UART1_SendStringAndWait(uint8_t *pData, uint16_t len) {
+	uint8_t strEnd[2] = {0x0A, 0x0D};
+	UART_Transmit(&huart1, pData, len);
+	while(uartTxReady == FALSE) {};
+	UART_Transmit(&huart1, strEnd, 2);
+	while(uartTxReady == FALSE) {};
+	return TRUE;
+}
+
+/*------------------------------------------------------*/
 //UART1_SendData
 /*------------------------------------------------------*/
 uint8_t UART1_SendData(uint8_t *pData, uint16_t len) {

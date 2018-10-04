@@ -13,6 +13,7 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 uint8_t UART1_SendData(uint8_t *pData, uint16_t len);
+uint8_t UART1_SendStringAndWait(uint8_t *pData, uint16_t len);
 
 #ifdef __cplusplus
 }
