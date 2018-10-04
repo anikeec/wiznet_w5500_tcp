@@ -29,13 +29,17 @@ int8_t	parseServicePacket(cJSON *json, ServicePacket* servicePacket);
 /* Private variables ---------------------------------------------------------*/
 DateTime dateTime;
 
+
 /* Functions -----------------------------------------------------------------*/
+
+
 
 /*------------------------------------------------------*/
 //createAccessMessage
 /*------------------------------------------------------*/
 int createAccessMessage(
-													char** result, 
+													char* resultBuffer, 
+													int resultBufferLength,
 													int deviceNumber,
 													int packetNumber,
 													char* cardNumber,
@@ -48,68 +52,95 @@ int createAccessMessage(
 	cJSON *cardNumberJson = NULL;
 	cJSON *eventTypeJson = NULL;
 	cJSON *eventIdJson = NULL;
-	cJSON *dateJson = NULL;	
-	char *dateTimeBuffer; 
+	cJSON *dateJson = NULL;
+	char *dateTimeBuffer;
+	int ret = TRUE;										
+	
 														
 	cJSON *message = cJSON_CreateObject();													
 	if (message == NULL) {
-		return 0;
+		ret = FALSE;
   }		
 	
-	messageTypeJson = cJSON_CreateString("ACCESS");
-	if (messageTypeJson == NULL) {
-		return 0;
-  }	
-	cJSON_AddItemToObject(message, "mt", messageTypeJson);
+	if(ret != FALSE) {
+		messageTypeJson = cJSON_CreateString("ACCESS");
+		if (messageTypeJson == NULL) {
+			ret = FALSE;
+		}	else {
+			cJSON_AddItemToObject(message, "mt", messageTypeJson);
+		}
+	}
 	
-	deviceNumberJson = cJSON_CreateNumber(deviceNumber);
-	if (deviceNumberJson == NULL) {
-		return 0;
-  }	
-	cJSON_AddItemToObject(message, "dn", deviceNumberJson);
+	if(ret != FALSE) {
+		deviceNumberJson = cJSON_CreateNumber(deviceNumber);
+		if (deviceNumberJson == NULL) {
+			ret = FALSE;
+		}	else {
+			cJSON_AddItemToObject(message, "dn", deviceNumberJson);
+		}
+	}
 	
-	packetNumberJson = cJSON_CreateNumber(packetNumber);
-	if (packetNumberJson == NULL) {
-		return 0;
-  }	
-	cJSON_AddItemToObject(message, "pn", packetNumberJson);
+	if(ret != FALSE) {
+		packetNumberJson = cJSON_CreateNumber(packetNumber);
+		if (packetNumberJson == NULL) {
+			ret = FALSE;
+		}	else {
+			cJSON_AddItemToObject(message, "pn", packetNumberJson);
+		}
+	}
 	
-	cardNumberJson = cJSON_CreateString(cardNumber);
-	if (cardNumberJson == NULL) {
-		return 0;
-  }	
-	cJSON_AddItemToObject(message, "cn", cardNumberJson);
+	if(ret != FALSE) {
+		cardNumberJson = cJSON_CreateString(cardNumber);
+		if (cardNumberJson == NULL) {
+			ret = FALSE;
+		}	else {
+			cJSON_AddItemToObject(message, "cn", cardNumberJson);
+		}
+	}
 	
-	eventTypeJson = cJSON_CreateString(eventType);
-	if (eventTypeJson == NULL) {
-		return 0;
-  }	
-	cJSON_AddItemToObject(message, "et", eventTypeJson);
+	if(ret != FALSE) {
+		eventTypeJson = cJSON_CreateString(eventType);
+		if (eventTypeJson == NULL) {
+			ret = FALSE;
+		}	else {
+			cJSON_AddItemToObject(message, "et", eventTypeJson);
+		}
+	}
 	
-	eventIdJson = cJSON_CreateNumber(eventId);
-	if (eventIdJson == NULL) {
-		return 0;
-  }	
-	cJSON_AddItemToObject(message, "ei", eventIdJson);
+	if(ret != FALSE) {
+		eventIdJson = cJSON_CreateNumber(eventId);
+		if (eventIdJson == NULL) {
+			ret = FALSE;
+		}	else {
+			cJSON_AddItemToObject(message, "ei", eventIdJson);
+		}
+	}
 	
-	rtcGetDateTime(&dateTime);
-	dateTimeBuffer = dateTimeToJsonDate(dateTime);
-	dateJson = cJSON_CreateString(dateTimeBuffer);
-	if (dateJson == NULL) {
-		return 0;
-  }	
-	cJSON_AddItemToObject(message, "t", dateJson);
+	if(ret != FALSE) {
+		rtcGetDateTime(&dateTime);
+		dateTimeBuffer = dateTimeToJsonDate(dateTime);
+		dateJson = cJSON_CreateString(dateTimeBuffer);
+		if (dateJson == NULL) {
+			ret = FALSE;
+		}	else {
+			cJSON_AddItemToObject(message, "t", dateJson);
+		}
+	}
 	
-	string = cJSON_Print(message);
-	if (string == NULL) {
-		return 0;
-  }
-	
-	*result = string;
+	if(ret != FALSE) {
+		ret = cJSON_PrintPreallocated(message, resultBuffer, resultBufferLength, 0);
+		/*
+		if (string == NULL) {
+			ret = FALSE;
+		} else {
+			*result = string;
+		}
+		*/
+	}
 	
 	cJSON_Delete(message);
 	
-	return 1;
+	return ret;
 }	
 
 /*------------------------------------------------------*/

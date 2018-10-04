@@ -60,7 +60,8 @@ typedef struct ServicePacketType	ServicePacket;
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 int createAccessMessage(
-													char** result, 
+													char* resultBuffer,
+													int resultBufferLength,
 													int deviceNumber,
 													int packetNumber,
 													char* cardNumber,
