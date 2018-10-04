@@ -50,12 +50,19 @@ int main(void)
 			buffer[length++] = 0x0D;
 			buffer[length++] = 0x0A;
 			
+			UART1_SendStringAndWait((uint8_t*)"Try connect", 11);
+		
 			retValue = networkTcpConnect(NETWORK_SOCKET, addr, NW_SERVER_PORT);
 			if(retValue == TRUE) {
+				
+				UART1_SendStringAndWait((uint8_t*)"Connected", 9);
+
 				networkTcpSend(NETWORK_SOCKET,(uint8_t*)buffer,length);
 			}
 			
-			memset(gDATABUF, NULL, DATA_BUF_SIZE);
+			UART1_SendStringAndWait((uint8_t*)"Sended", 6);
+			
+			//memset(gDATABUF, NULL, DATA_BUF_SIZE);
 			receivedResult = receiveServerAnswer(NETWORK_SOCKET, gDATABUF, DATA_BUF_SIZE, NW_SERVER_PORT);
 			if(receivedResult > 0) {
 				//we can parse result in the gDATABUF
@@ -64,7 +71,12 @@ int main(void)
 				result = parseServerAnswer(gDATABUF, receivedResult);
 				handleServerAnswer(result);
 			}				
+			
+			UART1_SendStringAndWait((uint8_t*)"Try disconnect", 14);
+			
 			networkTcpDisconnect(NETWORK_SOCKET);
+				
+			UART1_SendStringAndWait((uint8_t*)"Disconnected", 12);
   }
 
 }
