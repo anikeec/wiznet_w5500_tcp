@@ -18,6 +18,7 @@ uint8_t UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t len);
 
 /* Private variables ---------------------------------------------------------*/
 uint8_t	uartReady = FALSE;
+uint8_t uartTxReady = TRUE;
 RingBuffer uartTxBuf, uartRxBuf;
 uint8_t uartTxData;
 char readBuf[1];
@@ -39,6 +40,7 @@ uint8_t UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t len) {
     if(RingBuffer_Write(&uartTxBuf, pData, len) != RING_BUFFER_OK)
       return 0;
   }
+	uartTxReady = FALSE;
   return 1;
 }
 
@@ -59,7 +61,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   if(RingBuffer_GetDataLength(&uartTxBuf) > 0) {
     RingBuffer_Read(&uartTxBuf, &uartTxData, 1);
     HAL_UART_Transmit_IT(huart, &uartTxData, 1);
-  }
+  } else {
+		uartTxReady = TRUE;
+	}
 }
 
 /*------------------------------------------------------*/

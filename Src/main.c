@@ -35,13 +35,9 @@ int main(void)
 	uint8_t retValue = 0;
 	int16_t receivedResult = 0;	
 	uint8_t addr[4] = {NW_SERVER_ADDR0, NW_SERVER_ADDR1, NW_SERVER_ADDR2, NW_SERVER_ADDR3};
+	extern uint8_t uartTxReady;
 
 	hardwareInit();
-	
-	while(1) {
-		UART1_SendData(addr, 4);
-		while(1){};
-	}
 	
 	networkInit();
 		
@@ -63,6 +59,8 @@ int main(void)
 			receivedResult = receiveServerAnswer(NETWORK_SOCKET, gDATABUF, DATA_BUF_SIZE, NW_SERVER_PORT);
 			if(receivedResult > 0) {
 				//we can parse result in the gDATABUF
+				UART1_SendData(gDATABUF, receivedResult);
+				while(uartTxReady == FALSE) {};
 				result = parseServerAnswer(gDATABUF, receivedResult);
 				handleServerAnswer(result);
 			}				
