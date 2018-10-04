@@ -22,13 +22,14 @@ extern "C"
 uint8_t gDATABUF[DATA_BUF_SIZE];
 uint8_t tempBuffer[TEMP_BUF_SIZE];
 char buffer[MESSAGE_MAX_LENGTH];
+char messageBuffer[MESSAGE_MAX_LENGTH];
 
 /* Main ----------------------------------------------------------------------*/
 int main(void)
 {		
-	char* message;
+	char* message = messageBuffer;
 	//int* messageLength;
-	char* cardNumber = "11111111";
+	char cardNumber[10] = "11111111";
 	int length = 0;
 	int8_t	result = 0;
 	
@@ -43,12 +44,24 @@ int main(void)
 		
   while (1)
   {
-			createAccessMessage(&message,11,2,cardNumber,"ENTER_QUERY",3);
+			length = 0;
+		/*
+			do{
+				length = UART1_GetDataLength();
+			} while(length < 5);
+			UART1_Read((uint8_t*)cardNumber, length);
+		*/
+			UART1_Receive((uint8_t*)cardNumber, 8);
+		
+			createAccessMessage(message,MESSAGE_MAX_LENGTH,11,2,(char*)cardNumber,"ENTER_QUERY",3);
 			length = strlen(message);
 			memset(buffer,NULL,MESSAGE_MAX_LENGTH);
 			strlcpy(buffer,message,length+1);
 			buffer[length++] = 0x0D;
 			buffer[length++] = 0x0A;
+		
+			UART1_SendData((uint8_t*)buffer, length);
+			while(uartTxReady == FALSE) {};
 		
 			retValue = networkTcpConnect(NETWORK_SOCKET, addr, NW_SERVER_PORT);
 			if(retValue == TRUE) {

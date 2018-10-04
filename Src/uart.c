@@ -15,6 +15,7 @@ extern UART_HandleTypeDef huart1;
 
 /* Private functions ---------------------------------------------------------*/
 uint8_t UART_Transmit(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t len);
+uint8_t UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t len);
 
 /* Private variables ---------------------------------------------------------*/
 uint8_t	uartReady = FALSE;
@@ -43,6 +44,37 @@ uint8_t UART1_SendStringAndWait(uint8_t *pData, uint16_t len) {
 uint8_t UART1_SendData(uint8_t *pData, uint16_t len) {
 	return UART_Transmit(&huart1, pData, len);
 }
+
+/*------------------------------------------------------*/
+//UART1_Receive
+/*------------------------------------------------------*/
+uint8_t UART1_Receive(uint8_t *pData, uint16_t len) {
+	return UART_Receive(&huart1, pData, len);
+}
+
+/*------------------------------------------------------*/
+//UART1_GetDataLength
+/*------------------------------------------------------*/
+//uint16_t UART1_GetDataLength() {
+//	return RingBuffer_GetDataLength(&uartRxBuf);
+//}
+
+/*------------------------------------------------------*/
+//UART1_Read
+/*------------------------------------------------------*/
+//uint16_t UART1_Read(uint8_t *buffer, uint16_t len) {
+//	return RingBuffer_Read(&uartRxBuf, buffer, len);;
+//}
+
+/*------------------------------------------------------*/
+//UART_Receive
+/*------------------------------------------------------*/
+uint8_t UART_Receive(UART_HandleTypeDef *huart, uint8_t *pData, uint16_t len) {
+	if(HAL_UART_Receive(huart, pData, len, HAL_MAX_DELAY) != HAL_OK) {
+		return FALSE;
+	}
+	return TRUE;
+};
 
 /*------------------------------------------------------*/
 //UART_Transmit
