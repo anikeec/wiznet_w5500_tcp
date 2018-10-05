@@ -14,6 +14,8 @@ char dateTimeBuffer[DATE_TIME_SUF_SIZE];
 
 /* Private functions ---------------------------------------------------------*/
 void insert2NumberToBuffer(uint8_t number, char* buffer);
+uint8_t hexToSymbol(uint8_t temp);
+void hexToSymbolBuffer(uint8_t inputHex, uint8_t* resultBuffer);
 
 /* Functions -----------------------------------------------------------------*/
 
@@ -184,5 +186,63 @@ void uint32ToChars(uint32_t temp_var, uint8_t *temp_chars)
 		};
 		mult = mult/10;
 	}	
+}
+
+/*------------------------------------------------------*/
+//hexToSymbol
+/*------------------------------------------------------*/
+uint8_t hexToSymbol(uint8_t temp) {
+	if(temp > 0x0F)	return temp;
+	if((temp >= 0) && ( temp <= 9)) {
+		temp += '0';
+	} else {
+		switch(temp) {
+			case 0x0A:
+								temp = 'A';
+								break;
+			case 0x0B:
+								temp = 'B';
+								break;
+			case 0x0C:
+								temp = 'C';
+								break;
+			case 0x0D:
+								temp = 'D';
+								break;
+			case 0x0E:
+								temp = 'E';
+								break;
+			case 0x0F:
+								temp = 'F';
+								break;
+			default:
+								temp = ' ';
+								break;
+		}
+	}
+	return temp;
+}
+
+/*------------------------------------------------------*/
+//hexToSymbolBuffer
+/*------------------------------------------------------*/
+void hexToSymbolBuffer(uint8_t inputHex, uint8_t* resultBuffer) {
+	uint8_t temp = 0;
+	
+	temp = (inputHex&0xF0)>>4;
+	resultBuffer[0] = hexToSymbol(temp);
+	temp = inputHex&0x0F;
+	resultBuffer[1] = hexToSymbol(temp);
+}
+
+/*------------------------------------------------------*/
+//hexBufferToSymbolBuffer
+/*------------------------------------------------------*/
+void hexBufferToSymbolBuffer(uint8_t* hexBuffer, uint16_t len, uint8_t* symbBuffer) {
+	uint16_t i = 0;
+	uint32_t j = 0;
+	for(i=0; i<len; i++, j+=2) {
+		hexToSymbolBuffer(hexBuffer[i], &symbBuffer[j]);
+	}
 }
 

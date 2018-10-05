@@ -31,7 +31,7 @@ char* dateTimeToJsonDate(DateTime dateTime);
 void uint8ToChars(uint8_t temp_var, uint8_t *temp_chars);
 void uint16ToChars(uint16_t temp_var, uint8_t *temp_chars);
 void uint32ToChars(uint32_t temp_var, uint8_t *temp_chars);
-
+void hexBufferToSymbolBuffer(uint8_t* hexBuffer, uint16_t len, uint8_t* symbBuffer);
 
 #ifdef __cplusplus
 }

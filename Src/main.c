@@ -23,13 +23,14 @@ uint8_t gDATABUF[DATA_BUF_SIZE];
 uint8_t tempBuffer[TEMP_BUF_SIZE];
 char buffer[MESSAGE_MAX_LENGTH];
 char messageBuffer[MESSAGE_MAX_LENGTH];
+char cardNumber[CARD_BUFFER_LENGTH];
 
 /* Main ----------------------------------------------------------------------*/
 int main(void)
 {		
 	char* message = messageBuffer;
 	//int* messageLength;
-	char cardNumber[10] = "11111111";
+	uint8_t tempBuffer[20];
 	int length = 0;
 	int8_t	result = 0;
 	
@@ -51,7 +52,8 @@ int main(void)
 			} while(length < 5);
 			UART1_Read((uint8_t*)cardNumber, length);
 		*/
-			UART1_Receive((uint8_t*)cardNumber, 8);
+			UART1_Receive((uint8_t*)tempBuffer, CARD_EMMARINE_NUMBER_LENGTH);
+			hexBufferToSymbolBuffer((uint8_t*)tempBuffer, CARD_EMMARINE_NUMBER_LENGTH, (uint8_t*)cardNumber);
 		
 			createAccessMessage(message,MESSAGE_MAX_LENGTH,11,2,(char*)cardNumber,"ENTER_QUERY",3);
 			length = strlen(message);

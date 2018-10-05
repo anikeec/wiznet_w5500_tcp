@@ -7,6 +7,7 @@
 #define DATA_BUF_SIZE   2048
 #define TEMP_BUF_SIZE 	10
 #define MESSAGE_MAX_LENGTH	200
+#define CARD_BUFFER_LENGTH	50
 
 //network
 //-
@@ -28,9 +29,10 @@
 			DATA_BUF_SIZE	- 2048
 			TEMP_BUF_SIZE	- 10
 			MESSAGE_MAX_LENGTH - 200
+			CARD_BUFFER_LENGTH - 50
 			DATE_TIME_SUF_SIZE - 27
 			RING_BUFFER_LENGTH - 200*2 = 400
-			------------------ - 2685
+			------------------ - 2735
 			
 		heap:
 						1024
@@ -95,5 +97,7 @@
 
 #define TRUE						1
 #define FALSE						0
+
+#define CARD_EMMARINE_NUMBER_LENGTH	13
 
 #endif /* __DEFINITIONS_H */
